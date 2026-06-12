@@ -6,7 +6,7 @@
     <title>FFF — Саванна</title>
     <style>
         :root {
-            --pixel-size: 2px;
+            --pixel: 2px;
         }
 
         * {
@@ -33,19 +33,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             width: 100vw;
             height: 100vh;
-            padding: 8px;
+            padding: 5px;
         }
 
-        /* Окно просмотра карты */
         .viewport {
             width: 100%;
-            max-width: 900px;
-            height: 65vh;
+            max-width: 950px;
+            height: 62vh;
             border: 4px solid #3a2a0a;
-            border-radius: 4px;
             position: relative;
             overflow: hidden;
             cursor: grab;
@@ -54,156 +52,162 @@
                 0 0 0 6px #5a3a0a,
                 0 10px 40px rgba(0,0,0,0.8);
             background: #1a0a00;
+            image-rendering: pixelated;
         }
+        .viewport:active { cursor: grabbing; }
+        .viewport.grabbing { cursor: grabbing; }
 
-        .viewport:active {
-            cursor: grabbing;
-        }
-
-        .viewport.grabbing {
-            cursor: grabbing;
-        }
-
-        /* Огромная пиксельная карта */
         .world-map {
             position: absolute;
-            width: 3200px;
-            height: 2000px;
-            background: #c4a44a;
+            width: 3600px;
+            height: 2400px;
             image-rendering: pixelated;
-            image-rendering: crisp-edges;
             transition: none;
-        }
-
-        /* Слой земли */
-        .ground-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
             background: 
-                repeating-linear-gradient(
-                    0deg,
-                    #c4a44a 0px,
-                    #b8942e 4px,
-                    #c4a44a 8px
-                ),
-                repeating-linear-gradient(
-                    90deg,
-                    #c4a44a 0px,
-                    #b8942e 3px,
-                    #c4a44a 6px
-                );
-            background-blend-mode: overlay;
+                radial-gradient(ellipse at 20% 15%, #d4b44a 0%, #c4a44a 30%, #b8942e 70%, #8b6914 100%),
+                radial-gradient(ellipse at 70% 60%, #c4a44a 0%, #a8841e 50%, #7a5c10 100%),
+                radial-gradient(ellipse at 50% 80%, #b8942e 0%, #8b6914 60%, #6b4f12 100%);
+            background-blend-mode: multiply;
         }
 
-        /* Трава пиксельная */
-        .grass-pixel {
+        /* Пиксельная земля */
+        .dirt-pattern {
             position: absolute;
-            image-rendering: pixelated;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 6px, rgba(139,105,20,0.3) 6px, rgba(139,105,20,0.3) 7px),
+                repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(160,120,30,0.2) 8px, rgba(160,120,30,0.2) 9px);
             pointer-events: none;
         }
 
-        .grass-tile {
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            image-rendering: pixelated;
-            background: 
-                linear-gradient(180deg, 
-                    #3a7a20 0%, #3a7a20 25%,
-                    #2d6a18 25%, #2d6a18 50%,
-                    #1a5a0a 50%, #1a5a0a 75%,
-                    #0a4a00 75%, #0a4a00 100%);
-            clip-path: polygon(
-                50% 0%, 75% 25%, 100% 25%, 
-                87% 50%, 100% 75%, 75% 75%,
-                50% 100%, 25% 75%, 0% 75%,
-                12% 50%, 0% 25%, 25% 25%
-            );
-            pointer-events: none;
-        }
-
-        /* Деревья пиксельные */
-        .pixel-tree {
+        /* Трава разных видов */
+        .grass-clump {
             position: absolute;
             pointer-events: none;
             image-rendering: pixelated;
         }
-        .pixel-tree .trunk {
+        .grass-blade {
+            position: absolute;
+            width: 4px;
+            background: #3a7a20;
+            transform-origin: bottom center;
+            animation: swayBlade 3s ease-in-out infinite;
+        }
+        .grass-blade:nth-child(odd) { animation-delay: 0.5s; }
+        .grass-blade:nth-child(3n) { animation-delay: 1s; }
+        @keyframes swayBlade {
+            0%,100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        .tall-grass {
+            position: absolute;
+            pointer-events: none;
+            font-size: 16px;
+            opacity: 0.7;
+            animation: tallSway 4s ease-in-out infinite;
+        }
+        @keyframes tallSway {
+            0%,100% { transform: rotate(-3deg) scaleX(1); }
+            50% { transform: rotate(3deg) scaleX(-1); }
+        }
+
+        /* Деревья */
+        .savanna-tree {
+            position: absolute;
+            pointer-events: none;
+            image-rendering: pixelated;
+        }
+        .tree-body {
             position: absolute;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            background: #6b4a2a;
-            box-shadow: 
-                1px 0 0 #5a3a1a,
-                -1px 0 0 #7a5a3a;
+            background: linear-gradient(180deg, #7a5a3a, #4a2a10);
+            border-radius: 2px;
+            box-shadow: 1px 0 0 #5a3a1a, -1px 0 0 #8a6a4a;
         }
-        .pixel-tree .crown {
+        .tree-leaves {
             position: absolute;
-            background: #2a6a0a;
+            background: 
+                radial-gradient(ellipse at 40% 30%, #4a9a2a 0%, #2a6a0a 50%, #1a4a00 100%);
+            border-radius: 50% 50% 40% 40%;
             box-shadow: 
-                2px 2px 0 #1a5a00,
-                4px 0 0 #3a7a10,
-                -2px 2px 0 #1a4a00,
-                0 4px 0 #2a5a0a;
+                0 5px 15px rgba(0,0,0,0.3),
+                inset 0 -8px 15px rgba(0,0,0,0.3);
+        }
+        .tree-leaves.acacia {
+            border-radius: 30% 70% 40% 60% / 20% 80% 20% 80%;
+            background: radial-gradient(ellipse at 50% 60%, #5a8a3a, #2a5a0a);
         }
 
-        /* Река пиксельная */
-        .pixel-river {
+        /* Река */
+        .river-body {
             position: absolute;
-            image-rendering: pixelated;
             pointer-events: none;
-        }
-        .river-segment {
-            position: absolute;
-            background: #4a90d9;
             image-rendering: pixelated;
+        }
+        .water {
+            position: absolute;
+            background: linear-gradient(180deg, #6ab0f9 0%, #4a90d9 30%, #3a70b9 60%, #2a5a9a 100%);
             box-shadow: 
-                inset 2px 0 0 #3a70b9,
-                inset -2px 0 0 #5aa0e9,
-                inset 0 2px 0 #6ab0f9,
-                inset 0 -2px 0 #2a5a9a;
+                inset 3px 0 0 #5aa0e9,
+                inset -3px 0 0 #3a60a9,
+                inset 0 2px 0 rgba(255,255,255,0.3);
+            animation: waterFlow 2s linear infinite;
         }
-        .river-shimmer {
+        @keyframes waterFlow {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 16px; }
+        }
+        .water-sparkle {
             position: absolute;
-            background: rgba(255,255,255,0.4);
-            animation: pixelShimmer 3s steps(4) infinite;
-            pointer-events: none;
+            width: 6px;
+            height: 3px;
+            background: rgba(255,255,255,0.7);
+            animation: sparkle 2s ease-in-out infinite;
         }
-        @keyframes pixelShimmer {
-            0%, 100% { opacity: 0.2; transform: translateX(0); }
-            50% { opacity: 0.6; transform: translateX(8px); }
+        @keyframes sparkle {
+            0%,100% { opacity: 0.2; }
+            50% { opacity: 0.8; }
         }
 
         /* Камни */
-        .pixel-rock {
+        .stone {
             position: absolute;
-            background: #8a8a7a;
-            image-rendering: pixelated;
-            box-shadow: 
-                1px 1px 0 #6a6a5a,
-                -1px -1px 0 #aaaa9a,
-                2px 2px 0 #5a5a4a;
             pointer-events: auto;
             cursor: pointer;
-        }
-        .pixel-rock.sleep-rock {
-            background: #9a9a8a;
+            image-rendering: pixelated;
+            background: linear-gradient(135deg, #9a9a8a, #6a6a5a);
+            border-radius: 35% 40% 30% 45%;
             box-shadow: 
-                1px 1px 0 #7a7a6a,
-                -1px -1px 0 #baba9a,
-                2px 2px 0 #6a6a5a,
-                0 0 8px rgba(255,200,100,0.3);
+                2px 2px 0 #5a5a4a,
+                -1px -1px 0 #aaaa9a,
+                0 5px 15px rgba(0,0,0,0.4);
+            transition: box-shadow 0.3s;
         }
-        .pixel-rock.sleep-rock:hover {
+        .stone:hover {
             box-shadow: 
-                1px 1px 0 #7a7a6a,
-                -1px -1px 0 #baba9a,
-                2px 2px 0 #6a6a5a,
-                0 0 16px rgba(255,200,100,0.6);
+                2px 2px 0 #5a5a4a,
+                -1px -1px 0 #aaaa9a,
+                0 8px 25px rgba(0,0,0,0.5),
+                0 0 20px rgba(255,200,100,0.4);
+        }
+        .stone.sleep-stone {
+            background: linear-gradient(135deg, #b0b0a0, #8a8a7a);
+            cursor: pointer;
+        }
+        .stone.sleep-stone.active-sleep {
+            box-shadow: 
+                2px 2px 0 #5a5a4a,
+                -1px -1px 0 #aaaa9a,
+                0 0 30px rgba(255,200,100,0.7);
+            animation: sleepGlow 1.5s ease-in-out infinite;
+        }
+        @keyframes sleepGlow {
+            0%,100% { box-shadow: 2px 2px 0 #5a5a4a, 0 0 25px rgba(255,200,100,0.5); }
+            50% { box-shadow: 2px 2px 0 #5a5a4a, 0 0 40px rgba(255,200,100,0.8); }
         }
 
         /* Персонаж */
@@ -211,201 +215,141 @@
             position: absolute;
             z-index: 50;
             pointer-events: none;
-            width: 64px;
-            height: 64px;
+            width: 56px;
+            height: 56px;
             image-rendering: pixelated;
-            image-rendering: crisp-edges;
-            transition: left 0.12s ease-out, top 0.12s ease-out;
+            transition: left 0.1s ease-out, top 0.1s ease-out;
         }
         .character img {
             width: 100%;
             height: 100%;
             object-fit: contain;
             image-rendering: pixelated;
-            image-rendering: crisp-edges;
             filter: drop-shadow(3px 3px 0 rgba(0,0,0,0.5));
         }
-        .character.flip img {
-            transform: scaleX(-1);
-        }
-
-        /* Эмоция над головой */
-        .emote-badge {
+        .character.flip img { transform: scaleX(-1); }
+        .emote {
             position: absolute;
-            top: -28px;
+            top: -24px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 20px;
+            font-size: 18px;
             pointer-events: none;
             z-index: 51;
-            animation: emoteBounce 0.8s steps(3) infinite;
-            image-rendering: pixelated;
+            animation: emoteBounce 0.6s steps(3) infinite;
         }
         @keyframes emoteBounce {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-6px); }
+            0%,100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
         }
 
-        /* Анимации персонажа */
-        .character.chasing { animation: chaseAnim 0.35s steps(3) infinite; }
+        /* Анимации */
+        .character.chasing { animation: chaseAnim 0.3s steps(3) infinite; }
         .character.eating { animation: eatAnim 0.5s steps(3); }
         .character.angry img { animation: angryAnim 0.4s steps(3) infinite; filter: drop-shadow(3px 3px 0 rgba(255,0,0,0.6)) brightness(1.3) !important; }
         .character.hunting { animation: huntAnim 0.7s steps(4); }
-        .character.sleeping { animation: sleepAnim 2s steps(4) infinite; filter: brightness(0.7) saturate(0.6); }
+        .character.sleeping { animation: sleepAnim 2s steps(4) infinite; filter: brightness(0.6) saturate(0.5); }
         .character.avoiding { animation: avoidAnim 0.3s steps(2) infinite; }
         .character.curious { animation: curiousAnim 0.8s steps(4) infinite; }
         .character.annoyed { animation: annoyedAnim 0.2s steps(2) infinite; }
+        .character.drinking { animation: drinkAnim 0.6s steps(3); }
 
-        @keyframes chaseAnim {
-            0% { transform: translateY(0); }
-            33% { transform: translateY(-6px); }
-            66% { transform: translateY(-3px); }
-            100% { transform: translateY(0); }
-        }
-        @keyframes eatAnim {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-        @keyframes angryAnim {
-            0% { transform: translateX(0) rotate(0deg); }
-            33% { transform: translateX(-6px) rotate(-3deg); }
-            66% { transform: translateX(6px) rotate(3deg); }
-            100% { transform: translateX(0) rotate(0deg); }
-        }
-        @keyframes huntAnim {
-            0% { transform: scale(1,1); }
-            30% { transform: scale(0.8,1.1); }
-            60% { transform: scale(1.2,0.9) translateY(-20px); }
-            100% { transform: scale(1,1) translateY(0); }
-        }
-        @keyframes sleepAnim {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-        }
-        @keyframes avoidAnim {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(10px); }
-        }
-        @keyframes curiousAnim {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(-5deg); }
-            75% { transform: rotate(5deg); }
-            100% { transform: rotate(0deg); }
-        }
-        @keyframes annoyedAnim {
-            0% { transform: translateX(0) rotate(0deg); }
-            50% { transform: translateX(-4px) rotate(-2deg); }
-            100% { transform: translateX(0) rotate(0deg); }
-        }
+        @keyframes chaseAnim { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+        @keyframes eatAnim { 0%{transform:scale(1)} 50%{transform:scale(1.2)} 100%{transform:scale(1)} }
+        @keyframes angryAnim { 0%,100%{transform:translateX(0)rotate(0)} 33%{transform:translateX(-5px)rotate(-3deg)} 66%{transform:translateX(5px)rotate(3deg)} }
+        @keyframes huntAnim { 0%{transform:scale(1,1)} 40%{transform:scale(0.7,1.2)} 70%{transform:scale(1.3,0.8)translateY(-25px)} 100%{transform:scale(1)translateY(0)} }
+        @keyframes sleepAnim { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
+        @keyframes avoidAnim { 0%{transform:translateX(0)} 100%{transform:translateX(10px)} }
+        @keyframes curiousAnim { 0%{transform:rotate(0)} 25%{transform:rotate(-5deg)} 75%{transform:rotate(5deg)} 100%{transform:rotate(0)} }
+        @keyframes annoyedAnim { 0%{transform:translateX(0)} 50%{transform:translateX(-3px)rotate(-2deg)} 100%{transform:translateX(0)} }
+        @keyframes drinkAnim { 0%{transform:scale(1)} 30%{transform:scale(1,0.8)} 60%{transform:scale(0.9,1)} 100%{transform:scale(1)} }
 
         /* Добыча */
-        .prey-sprite {
+        .prey {
             position: absolute;
-            font-size: 24px;
+            font-size: 22px;
             pointer-events: auto;
             z-index: 30;
-            cursor: pointer;
-            image-rendering: pixelated;
-            animation: preyWander 4s steps(6) infinite;
-            filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.4));
-        }
-        .prey-sprite:hover { transform: scale(1.3); }
-        .prey-sprite.fleeing {
-            animation: fleeFast 0.8s steps(5) forwards;
-            pointer-events: auto;
             cursor: crosshair;
+            animation: preyWander 3s steps(5) infinite;
+            filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.4));
+            transition: transform 0.1s;
         }
-        .prey-sprite.caught {
-            animation: caughtDie 0.5s steps(3) forwards;
+        .prey:hover { transform: scale(1.3); }
+        .prey.fleeing {
+            animation: fleeFast 0.7s steps(4) forwards;
+            pointer-events: auto;
+        }
+        .prey.caught {
+            animation: caughtAnim 0.4s steps(3) forwards;
             pointer-events: none;
         }
         @keyframes preyWander {
-            0% { transform: translate(0,0); }
-            25% { transform: translate(40px,-20px); }
-            50% { transform: translate(20px,-10px); }
-            75% { transform: translate(-30px,-25px); }
-            100% { transform: translate(0,0); }
+            0%{transform:translate(0,0)} 25%{transform:translate(30px,-15px)} 50%{transform:translate(15px,-8px)} 75%{transform:translate(-25px,-20px)} 100%{transform:translate(0,0)}
         }
         @keyframes fleeFast {
-            0% { transform: translate(0,0) scale(1); opacity: 1; }
-            30% { transform: translate(var(--fx),var(--fy)) scale(1.1); opacity: 1; }
-            100% { transform: translate(calc(var(--fx)*3),calc(var(--fy)*3)) scale(0.5); opacity: 0.5; }
+            0%{transform:translate(0,0)scale(1);opacity:1}
+            100%{transform:translate(var(--fx),var(--fy))scale(0.4);opacity:0.4}
         }
-        @keyframes caughtDie {
-            0% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(0) translateY(-30px); }
+        @keyframes caughtAnim {
+            0%{opacity:1;transform:scale(1)} 100%{opacity:0;transform:scale(0)translateY(-25px)}
         }
 
         /* Мясо */
-        .meat-drop {
+        .meat {
             position: absolute;
-            font-size: 22px;
+            font-size: 20px;
             z-index: 28;
             pointer-events: auto;
             cursor: pointer;
-            image-rendering: pixelated;
-            animation: meatFall 0.4s steps(4) ease-out;
+            animation: meatDrop 0.3s steps(3) ease-out;
             filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5));
         }
-        .meat-drop:hover {
-            transform: scale(1.4);
-            filter: drop-shadow(3px 3px 0 rgba(0,0,0,0.7)) brightness(1.3);
-        }
-        @keyframes meatFall {
-            0% { transform: translateY(-40px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
+        .meat:hover { transform: scale(1.4); filter: drop-shadow(3px 3px 0 rgba(0,0,0,0.7)) brightness(1.3); }
+        @keyframes meatDrop { 0%{transform:translateY(-35px);opacity:0} 100%{transform:translateY(0);opacity:1} }
 
-        /* Панель статуса */
-        .stats-panel {
+        /* Панель */
+        .panel {
             background: #1a1a2e;
             border: 3px solid #3a2a0a;
-            padding: 12px 20px;
+            padding: 10px 18px;
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
             image-rendering: pixelated;
         }
-        .stat {
+        .stat-col {
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 2px;
         }
-        .stat-label {
+        .stat-lbl {
             color: #aaa;
-            font-size: 10px;
-            text-transform: uppercase;
+            font-size: 9px;
             letter-spacing: 2px;
+            text-transform: uppercase;
         }
-        .stat-bar-outer {
-            height: 8px;
+        .stat-bar-wrap {
+            height: 7px;
             background: #1a1a3a;
             border: 1px solid #3a3a5c;
-            image-rendering: pixelated;
         }
-        .stat-bar-inner {
+        .stat-bar-fill {
             height: 100%;
-            transition: width 0.4s steps(8);
-            image-rendering: pixelated;
+            transition: width 0.5s steps(8);
         }
-        .stat-bar-inner.hunger { background: #e94560; box-shadow: 0 0 4px #e94560; }
-        .stat-bar-inner.energy { background: #4ecdc4; box-shadow: 0 0 4px #4ecdc4; }
-        .stat-bar-inner.mood { background: #ffd93d; box-shadow: 0 0 4px #ffd93d; }
-        .stat-num {
-            color: #e0e0e0;
-            font-size: 12px;
-            font-weight: bold;
-        }
+        .fill-hunger { background: #e94560; box-shadow: 0 0 4px #e94560; }
+        .fill-thirst { background: #5b9bd5; box-shadow: 0 0 4px #5b9bd5; }
+        .fill-energy { background: #4ecdc4; box-shadow: 0 0 4px #4ecdc4; }
+        .fill-mood { background: #ffd93d; box-shadow: 0 0 4px #ffd93d; }
+        .stat-num { color: #e0e0e0; font-size: 11px; font-weight: bold; }
 
-        /* Кнопки */
         .btn-row {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
             justify-content: center;
         }
@@ -413,70 +357,57 @@
             background: #1a1a2e;
             color: #e0e0e0;
             border: 2px solid #3a3a5c;
-            padding: 8px 14px;
+            padding: 7px 12px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-family: 'Courier New', monospace;
-            image-rendering: pixelated;
+            letter-spacing: 1px;
             transition: all 0.1s;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
-        .btn:hover {
-            background: #2a2a4e;
-            border-color: #5a5a8c;
-            transform: translateY(-2px);
-        }
+        .btn:hover { background: #2a2a4e; border-color: #5a5a8c; transform: translateY(-1px); }
         .btn:active { transform: translateY(0); }
-        .btn.hunt { border-color: #ff6b6b; background: #2a1018; }
-        .btn.hunt.on { border-color: #ff3333; background: #3a1520; box-shadow: 0 0 12px rgba(255,0,0,0.3); }
+        .btn.hunt-btn { border-color: #ff6b6b; background: #2a1018; }
+        .btn.hunt-btn.on { border-color: #ff3333; background: #3a1520; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
 
-        /* Облачка сообщений */
-        .msg-bubble {
+        .msg {
             position: absolute;
             background: #fff;
             color: #1a1a2e;
-            padding: 5px 10px;
-            font-size: 11px;
+            padding: 4px 8px;
+            font-size: 10px;
             font-weight: bold;
             z-index: 60;
             pointer-events: none;
             font-family: 'Courier New', monospace;
-            image-rendering: pixelated;
-            animation: msgUp 2s steps(8) forwards;
+            animation: msgUp 2s steps(6) forwards;
             white-space: nowrap;
             border: 2px solid #ccc;
         }
         @keyframes msgUp {
-            0% { opacity: 0; transform: translateY(8px); }
-            15% { opacity: 1; transform: translateY(-15px); }
-            80% { opacity: 1; transform: translateY(-35px); }
-            100% { opacity: 0; transform: translateY(-60px); }
+            0%{opacity:0;transform:translateY(6px)} 15%{opacity:1;transform:translateY(-12px)} 80%{opacity:1;transform:translateY(-30px)} 100%{opacity:0;transform:translateY(-50px)}
         }
 
-        /* Память */
-        .mem-bar {
+        .mem-row {
             background: #1a1a2e;
             border: 2px solid #3a2a0a;
-            padding: 8px 15px;
+            padding: 6px 12px;
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
-            font-size: 10px;
-            max-height: 55px;
+            gap: 4px;
+            font-size: 9px;
+            max-height: 45px;
             overflow-y: auto;
-            image-rendering: pixelated;
         }
         .mem-tag {
             background: #2a2a4a;
-            padding: 2px 6px;
-            font-size: 10px;
+            padding: 2px 5px;
             color: #aaa;
             font-family: 'Courier New', monospace;
         }
-        .mem-tag.alert {
+        .mem-tag.red {
             background: #3a1a2a;
             color: #ff6b6b;
             border: 1px solid #5a2a3a;
@@ -484,496 +415,731 @@
 
         .title {
             color: #d4a574;
-            font-size: 18px;
+            font-size: 16px;
             letter-spacing: 3px;
             font-family: 'Courier New', monospace;
             text-shadow: 0 0 10px rgba(212,167,116,0.4);
-            image-rendering: pixelated;
         }
 
         .fallback-emoji {
-            font-size: 50px;
+            font-size: 45px;
             display: none;
             position: absolute;
-        }
-
-        @media (max-width: 950px) {
-            .viewport { height: 50vh; }
-            .btn { padding: 6px 10px; font-size: 10px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="title">▲ FFF — САВАННА ▲</div>
+        <div class="title">▲ FFF — ДИКАЯ САВАННА ▲</div>
 
-        <!-- Вьюпорт -->
-        <div class="viewport" id="viewport">
-            <div class="world-map" id="worldMap">
-                <!-- Карта генерируется в JS -->
+        <div class="viewport" id="vp">
+            <div class="world-map" id="map">
+                <div class="dirt-pattern"></div>
             </div>
-            <div class="character" id="character">
-                <img src="FFF.png" alt="FFF" id="charImg" onerror="onImgErr()">
+            <div class="character" id="char">
+                <img src="FFF.png" alt="FFF" id="charImg" onerror="imgErr()">
                 <span class="fallback-emoji" id="fbEmoji">🦁</span>
-                <div class="emote-badge" id="emoteBadge"></div>
+                <div class="emote" id="emoteEl"></div>
             </div>
         </div>
 
-        <!-- Статус -->
-        <div class="stats-panel">
-            <div class="stat">
-                <div class="stat-label">◄ ГОЛОД ►</div>
-                <div class="stat-bar-outer"><div class="stat-bar-inner hunger" id="hungerBar" style="width:70%"></div></div>
+        <div class="panel">
+            <div class="stat-col">
+                <div class="stat-lbl">🍖 Голод</div>
+                <div class="stat-bar-wrap"><div class="stat-bar-fill fill-hunger" id="hungerBar" style="width:70%"></div></div>
                 <div class="stat-num" id="hungerVal">70%</div>
             </div>
-            <div class="stat">
-                <div class="stat-label">◄ ЭНЕРГИЯ ►</div>
-                <div class="stat-bar-outer"><div class="stat-bar-inner energy" id="energyBar" style="width:80%"></div></div>
+            <div class="stat-col">
+                <div class="stat-lbl">💧 Жажда</div>
+                <div class="stat-bar-wrap"><div class="stat-bar-fill fill-thirst" id="thirstBar" style="width:60%"></div></div>
+                <div class="stat-num" id="thirstVal">60%</div>
+            </div>
+            <div class="stat-col">
+                <div class="stat-lbl">⚡ Энергия</div>
+                <div class="stat-bar-wrap"><div class="stat-bar-fill fill-energy" id="energyBar" style="width:80%"></div></div>
                 <div class="stat-num" id="energyVal">80%</div>
             </div>
-            <div class="stat">
-                <div class="stat-label">◄ НАСТРОЕНИЕ ►</div>
-                <div class="stat-bar-outer"><div class="stat-bar-inner mood" id="moodBar" style="width:40%"></div></div>
-                <div class="stat-num" id="moodVal">40%</div>
+            <div class="stat-col">
+                <div class="stat-lbl">😾 Настр.</div>
+                <div class="stat-bar-wrap"><div class="stat-bar-fill fill-mood" id="moodBar" style="width:45%"></div></div>
+                <div class="stat-num" id="moodVal">45%</div>
             </div>
         </div>
 
-        <!-- Кнопки -->
         <div class="btn-row">
-            <button class="btn" onclick="pet()">✋ ГЛАДИТЬ</button>
-            <button class="btn" onclick="feed()">🍖 КОРМИТЬ</button>
-            <button class="btn" onclick="play()">🎾 ИГРАТЬ</button>
-            <button class="btn hunt" id="huntBtn" onclick="toggleHunt()">⚔ ОХОТА</button>
-            <button class="btn" onclick="goSleep()">💤 СПАТЬ</button>
+            <button class="btn" onclick="doPet()">✋ Гладить</button>
+            <button class="btn" onclick="doFeed()">🍖 Кормить</button>
+            <button class="btn" onclick="doPlay()">🎾 Играть</button>
+            <button class="btn hunt-btn" id="huntBtn" onclick="toggleHunt()">⚔ Охота</button>
+            <button class="btn" onclick="doSleep()">💤 Спать</button>
         </div>
 
-        <!-- Память -->
-        <div class="mem-bar" id="memBar">
+        <div class="mem-row" id="memRow">
             <span style="color:#666;">ПАМЯТЬ:</span>
         </div>
     </div>
 
     <script>
-        // ===== ОШИБКА КАРТИНКИ =====
-        function onImgErr() {
+        function imgErr() {
             document.getElementById('charImg').style.display = 'none';
             document.getElementById('fbEmoji').style.display = 'block';
         }
 
         // ===== КАРТА =====
-        const MAP_W = 3200, MAP_H = 2000;
-        const worldMap = document.getElementById('worldMap');
-        const viewport = document.getElementById('viewport');
+        const MW = 3600, MH = 2400;
+        const mapEl = document.getElementById('map');
+        const vp = document.getElementById('vp');
 
-        function buildPixelMap() {
-            let html = '';
+        function buildMap() {
+            let h = '';
 
             // Трава
-            for (let i = 0; i < 300; i++) {
-                const gx = Math.floor(Math.random() * MAP_W / 16) * 16;
-                const gy = Math.floor(Math.random() * MAP_H / 16) * 16;
-                html += `<div class="grass-tile" style="left:${gx}px;top:${gy}px;"></div>`;
+            for (let i = 0; i < 400; i++) {
+                const gx = Math.floor(Math.random() * MW / 12) * 12;
+                const gy = Math.floor(Math.random() * MH / 12) * 12;
+                const type = Math.floor(Math.random() * 3);
+                if (type === 0) {
+                    h += `<div class="grass-clump" style="left:${gx}px;top:${gy}px;width:20px;height:16px;">
+                        <div class="grass-blade" style="left:4px;bottom:0;height:10px;"></div>
+                        <div class="grass-blade" style="left:8px;bottom:0;height:14px;"></div>
+                        <div class="grass-blade" style="left:12px;bottom:0;height:12px;"></div>
+                    </div>`;
+                } else {
+                    h += `<div class="tall-grass" style="left:${gx}px;top:${gy}px;">${['🌿','🌾','🪨'][type-1]}</div>`;
+                }
             }
 
             // Деревья
-            const trees = [];
-            for (let i = 0; i < 35; i++) {
-                const tx = 40 + Math.random() * (MAP_W - 200);
-                const ty = 20 + Math.random() * (MAP_H - 200);
-                const th = 80 + Math.random() * 120;
-                trees.push({x:tx, y:ty, h:th});
-            }
-            trees.forEach(t => {
-                html += `
-                <div class="pixel-tree" style="left:${t.x}px;top:${t.y}px;width:${t.h*0.5}px;height:${t.h}px;">
-                    <div class="trunk" style="width:12px;height:${t.h*0.35}px;"></div>
-                    <div class="crown" style="width:${t.h*0.45}px;height:${t.h*0.5}px;top:0;left:50%;transform:translateX(-50%);"></div>
+            for (let i = 0; i < 45; i++) {
+                const tx = 30 + Math.random() * (MW - 200);
+                const ty = 20 + Math.random() * (MH - 250);
+                const th = 70 + Math.random() * 140;
+                const acacia = Math.random() > 0.6;
+                h += `<div class="savanna-tree" style="left:${tx}px;top:${ty}px;width:${th*0.45}px;height:${th}px;">
+                    <div class="tree-body" style="width:10px;height:${th*0.3}px;"></div>
+                    <div class="tree-leaves${acacia?' acacia':''}" style="width:${th*0.4}px;height:${th*0.5}px;top:0;left:50%;transform:translateX(-50%);"></div>
                 </div>`;
-            });
+            }
 
             // Река
-            html += `
-            <div class="pixel-river" style="left:600px;top:0;width:100px;height:1200px;">
-                <div class="river-segment" style="width:100px;height:1200px;"></div>
-                <div class="river-shimmer" style="left:15px;top:100px;width:50px;height:10px;"></div>
-                <div class="river-shimmer" style="left:20px;top:400px;width:45px;height:10px;animation-delay:1s;"></div>
-                <div class="river-shimmer" style="left:10px;top:700px;width:55px;height:10px;animation-delay:2s;"></div>
-            </div>
-            <div class="pixel-river" style="left:660px;top:1150px;width:600px;height:70px;">
-                <div class="river-segment" style="width:600px;height:70px;border-radius:0 20px 20px 0;"></div>
-                <div class="river-shimmer" style="left:50px;top:25px;width:80px;height:10px;"></div>
-            </div>
-            <div class="pixel-river" style="left:1200px;top:1050px;width:80px;height:400px;">
-                <div class="river-segment" style="width:80px;height:400px;"></div>
+            h += `<div class="river-body" style="left:700px;top:0;width:90px;height:1100px;">
+                <div class="water" style="width:90px;height:1100px;"></div>
+                <div class="water-sparkle" style="left:20px;top:150px;animation-delay:0s;"></div>
+                <div class="water-sparkle" style="left:50px;top:350px;animation-delay:0.7s;"></div>
+                <div class="water-sparkle" style="left:15px;top:600px;animation-delay:1.4s;"></div>
+                <div class="water-sparkle" style="left:55px;top:850px;animation-delay:2.1s;"></div>
+            </div>`;
+            h += `<div class="river-body" style="left:750px;top:1050px;width:500px;height:60px;">
+                <div class="water" style="width:500px;height:60px;border-radius:0 15px 15px 0;"></div>
+            </div>`;
+            h += `<div class="river-body" style="left:1200px;top:950px;width:75px;height:450px;">
+                <div class="water" style="width:75px;height:450px;"></div>
+                <div class="water-sparkle" style="left:25px;top:100px;"></div>
             </div>`;
 
-            // Камни
+            // Камни для сна
             const sleepRocks = [
-                {x:900, y:400, w:90, h:55},
-                {x:1800, y:300, w:100, h:60},
-                {x:2200, y:800, w:85, h:50},
-                {x:400, y:1000, w:95, h:58},
+                {x:1000, y:350, w:85, h:50},
+                {x:1900, y:280, w:95, h:55},
+                {x:2400, y:750, w:80, h:48},
+                {x:500, y:950, w:90, h:52},
+                {x:1600, y:1100, w:88, h:50},
+                {x:2800, y:500, w:82, h:48},
             ];
             sleepRocks.forEach((r, i) => {
-                html += `<div class="pixel-rock sleep-rock" data-sleep="${i}" 
+                h += `<div class="stone sleep-stone" data-sleep="${i}" 
                     style="left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px;"
-                    onclick="clickSleepRock(${i},${r.x},${r.y})"></div>`;
+                    onclick="clickSleep(${i},${r.x},${r.y})"></div>`;
             });
 
-            for (let i = 0; i < 40; i++) {
-                const rx = Math.random() * MAP_W;
-                const ry = Math.random() * MAP_H;
-                const rw = 20 + Math.random() * 40;
-                html += `<div class="pixel-rock" style="left:${rx}px;top:${ry}px;width:${rw}px;height:${rw*0.6}px;"></div>`;
+            // Обычные камни
+            for (let i = 0; i < 50; i++) {
+                const rx = Math.random() * MW;
+                const ry = Math.random() * MH;
+                const rw = 18 + Math.random() * 35;
+                h += `<div class="stone" style="left:${rx}px;top:${ry}px;width:${rw}px;height:${rw*0.6}px;"></div>`;
             }
 
-            worldMap.innerHTML = html;
+            mapEl.innerHTML += h;
         }
 
-        // ===== СКРОЛЛИНГ КАРТЫ =====
-        let camX = 800, camY = 500;
-        let isDragging = false, dragStartX, dragStartY, camStartX, camStartY;
+        // ===== КАМЕРА =====
+        let camX = 900, camY = 500;
+        let dragging = false, dsx, dsy, csx, csy;
 
-        function updateCamera() {
-            const vw = viewport.clientWidth;
-            const vh = viewport.clientHeight;
-            camX = Math.max(0, Math.min(MAP_W - vw, camX));
-            camY = Math.max(0, Math.min(MAP_H - vh, camY));
-            worldMap.style.transform = `translate(${-camX}px, ${-camY}px)`;
+        function updateCam() {
+            const vw = vp.clientWidth, vh = vp.clientHeight;
+            camX = Math.max(0, Math.min(MW - vw, camX));
+            camY = Math.max(0, Math.min(MH - vh, camY));
+            mapEl.style.transform = `translate(${-camX}px,${-camY}px)`;
         }
 
-        viewport.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.pixel-rock') || e.target.closest('.prey-sprite') || 
-                e.target.closest('.meat-drop') || e.target.closest('button')) return;
-            isDragging = true;
-            viewport.classList.add('grabbing');
-            dragStartX = e.clientX;
-            dragStartY = e.clientY;
-            camStartX = camX;
-            camStartY = camY;
+        vp.addEventListener('mousedown', e => {
+            if (e.target.closest('.stone') || e.target.closest('.prey') || e.target.closest('.meat') || e.target.closest('button')) return;
+            dragging = true; vp.classList.add('grabbing');
+            dsx = e.clientX; dsy = e.clientY;
+            csx = camX; csy = camY;
         });
+        window.addEventListener('mousemove', e => {
+            if (!dragging) return;
+            camX = csx + (dsx - e.clientX);
+            camY = csy + (dsy - e.clientY);
+            updateCam();
+        });
+        window.addEventListener('mouseup', () => { dragging = false; vp.classList.remove('grabbing'); });
 
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            camX = camStartX + (dragStartX - e.clientX);
-            camY = camStartY + (dragStartY - e.clientY);
-            updateCamera();
+        vp.addEventListener('touchstart', e => {
+            if (e.target.closest('.stone') || e.target.closest('.prey') || e.target.closest('.meat')) return;
+            dragging = true;
+            dsx = e.touches[0].clientX; dsy = e.touches[0].clientY;
+            csx = camX; csy = camY;
+        }, {passive: false});
+        window.addEventListener('touchmove', e => {
+            if (!dragging) return;
+            camX = csx + (dsx - e.touches[0].clientX);
+            camY = csy + (dsy - e.touches[0].clientY);
+            updateCam();
         });
-
-        window.addEventListener('mouseup', () => {
-            isDragging = false;
-            viewport.classList.remove('grabbing');
-        });
-
-        // Тач
-        viewport.addEventListener('touchstart', (e) => {
-            if (e.target.closest('.pixel-rock') || e.target.closest('.prey-sprite') || 
-                e.target.closest('.meat-drop')) return;
-            isDragging = true;
-            dragStartX = e.touches[0].clientX;
-            dragStartY = e.touches[0].clientY;
-            camStartX = camX;
-            camStartY = camY;
-        });
-        window.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            camX = camStartX + (dragStartX - e.touches[0].clientX);
-            camY = camStartY + (dragStartY - e.touches[0].clientY);
-            updateCamera();
-        });
-        window.addEventListener('touchend', () => { isDragging = false; });
+        window.addEventListener('touchend', () => { dragging = false; });
 
         // ===== СОСТОЯНИЕ =====
-        const S = {
-            hunger: 70, energy: 80, mood: 40,
+        const ST = {
+            hunger: 70, thirst: 60, energy: 80, mood: 45,
             hunt: false, chase: false, sleep: false,
             emotion: '😼', memory: [],
             preyList: [], meatList: [],
-            huntStamina: 100,
+            autoTarget: null, autoAction: null,
         };
 
-        const charEl = document.getElementById('character');
-        const emoteBadge = document.getElementById('emoteBadge');
+        const charEl = document.getElementById('char');
+        const emoteEl = document.getElementById('emoteEl');
         const huntBtn = document.getElementById('huntBtn');
-        const memBar = document.getElementById('memBar');
+        const memRow = document.getElementById('memRow');
 
-        let charX = 1200, charY = 600;
-        let targetX = 1200, targetY = 600;
-        let mouseMapX = 1200, mouseMapY = 600;
+        let charX = 1400, charY = 600;
+        let targetX = 1400, targetY = 600;
+        let mouseMX = 1400, mouseMY = 600;
+
+        // Река для питья
+        const riverZones = [
+            {x:700, y:0, w:140, h:1100},
+            {x:750, y:1050, w:500, h:60},
+            {x:1200, y:950, w:75, h:450},
+        ];
+
+        function nearRiver() {
+            for (const rz of riverZones) {
+                if (charX > rz.x - 30 && charX < rz.x + rz.w + 30 &&
+                    charY > rz.y - 30 && charY < rz.y + rz.h + 30) return true;
+            }
+            return false;
+        }
 
         // ===== ЭМОЦИИ =====
-        function setEmote(emoji) {
-            S.emotion = emoji;
-            emoteBadge.textContent = emoji;
-        }
-
+        function setEmote(emo) { ST.emotion = emo; emoteEl.textContent = emo; }
         function updateEmote() {
-            charEl.classList.remove('chasing','eating','angry','hunting','sleeping','avoiding','curious','annoyed');
-            if (S.sleep) { charEl.classList.add('sleeping'); setEmote('💤'); return; }
-            
-            if (S.mood >= 80) { setEmote('😸'); charEl.classList.add('curious'); }
-            else if (S.mood >= 60) { setEmote('😼'); }
-            else if (S.mood >= 40) { setEmote('😾'); if(S.mood<=50) charEl.classList.add('avoiding'); }
-            else if (S.mood >= 20) { setEmote('😡'); charEl.classList.add('annoyed'); charEl.classList.add('avoiding'); }
+            charEl.classList.remove('chasing','eating','angry','hunting','sleeping','avoiding','curious','annoyed','drinking');
+            if (ST.sleep) { charEl.classList.add('sleeping'); setEmote('💤'); return; }
+            if (ST.mood >= 80) { setEmote('😸'); charEl.classList.add('curious'); }
+            else if (ST.mood >= 60) setEmote('😼');
+            else if (ST.mood >= 40) { setEmote('😾'); if(ST.mood<=50) charEl.classList.add('avoiding'); }
+            else if (ST.mood >= 20) { setEmote('😡'); charEl.classList.add('annoyed'); charEl.classList.add('avoiding'); }
             else { setEmote('🤬'); charEl.classList.add('angry'); charEl.classList.add('avoiding'); }
-            
-            if (S.hunger>80 && S.mood<50) { setEmote('😤'); charEl.classList.add('angry'); }
-            if (S.energy<20) setEmote('😩');
+            if (ST.hunger > 80 && ST.mood < 50) { setEmote('😤'); charEl.classList.add('angry'); }
+            if (ST.energy < 20) setEmote('😩');
+            if (ST.thirst > 80) setEmote('🥵');
         }
 
-        // ===== СТАТУСЫ =====
         function updStats() {
-            S.hunger = Math.max(0,Math.min(100,S.hunger));
-            S.energy = Math.max(0,Math.min(100,S.energy));
-            S.mood = Math.max(0,Math.min(100,S.mood));
-            document.getElementById('hungerBar').style.width = S.hunger+'%';
-            document.getElementById('energyBar').style.width = S.energy+'%';
-            document.getElementById('moodBar').style.width = S.mood+'%';
-            document.getElementById('hungerVal').textContent = Math.round(S.hunger)+'%';
-            document.getElementById('energyVal').textContent = Math.round(S.energy)+'%';
-            document.getElementById('moodVal').textContent = Math.round(S.mood)+'%';
+            ST.hunger = Math.max(0, Math.min(100, ST.hunger));
+            ST.thirst = Math.max(0, Math.min(100, ST.thirst));
+            ST.energy = Math.max(0, Math.min(100, ST.energy));
+            ST.mood = Math.max(0, Math.min(100, ST.mood));
+            document.getElementById('hungerBar').style.width = ST.hunger + '%';
+            document.getElementById('thirstBar').style.width = ST.thirst + '%';
+            document.getElementById('energyBar').style.width = ST.energy + '%';
+            document.getElementById('moodBar').style.width = ST.mood + '%';
+            document.getElementById('hungerVal').textContent = Math.round(ST.hunger) + '%';
+            document.getElementById('thirstVal').textContent = Math.round(ST.thirst) + '%';
+            document.getElementById('energyVal').textContent = Math.round(ST.energy) + '%';
+            document.getElementById('moodVal').textContent = Math.round(ST.mood) + '%';
             updateEmote();
 
-            if (S.mood<=50 && !S.sleep && !S.hunt && !S.chase) {
-                const dx=mouseMapX-charX, dy=mouseMapY-charY;
-                const dist=Math.sqrt(dx*dx+dy*dy);
-                if(dist<120){targetX=charX-(dx/dist)*130; targetY=charY-(dy/dist)*130;}
+            // Избегание при плохом настроении
+            if (ST.mood <= 50 && !ST.sleep && !ST.chase && !ST.autoAction) {
+                const dx = mouseMX - charX, dy = mouseMY - charY;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 120 && !ST.hunt) {
+                    targetX = charX - (dx/dist) * 140;
+                    targetY = charY - (dy/dist) * 140;
+                }
             }
-            if(S.hunger>80 && S.mood<30 && S.energy>25 && !S.sleep && !S.hunt) startChase();
         }
 
         // ===== ПАМЯТЬ =====
-        function addMem(act, warn=false) {
-            const t=new Date().toLocaleTimeString();
-            const e=`${t}: ${act}`;
-            if(S.memory.length>0 && S.memory[S.memory.length-1].includes(act)) return;
-            S.memory.push(e);
-            if(S.memory.length>20) S.memory.shift();
-            memBar.innerHTML='<span style="color:#666;">ПАМЯТЬ:</span> '+
-                S.memory.slice(-8).map(m=>`<span class="mem-tag${warn?' alert':''}">${m}</span>`).join('');
+        function addMem(act, red = false) {
+            const t = new Date().toLocaleTimeString();
+            const e = `${t}: ${act}`;
+            if (ST.memory.length > 0 && ST.memory[ST.memory.length-1].includes(act)) return;
+            ST.memory.push(e);
+            if (ST.memory.length > 20) ST.memory.shift();
+            memRow.innerHTML = '<span style="color:#666;">ПАМЯТЬ:</span> ' +
+                ST.memory.slice(-8).map(m => `<span class="mem-tag${red?' red':''}">${m}</span>`).join('');
         }
 
-        // ===== СООБЩЕНИЯ =====
         function showMsg(text, x, y) {
-            const b=document.createElement('div');
-            b.className='msg-bubble';
-            b.textContent=text;
-            b.style.left=Math.max(5,Math.min(MAP_W-100,x-camX))+'px';
-            b.style.top=Math.max(5,y-camY-20)+'px';
-            viewport.appendChild(b);
-            setTimeout(()=>b.remove(),2000);
+            const b = document.createElement('div');
+            b.className = 'msg';
+            b.textContent = text;
+            b.style.left = Math.max(5, Math.min(MW - 100, x - camX)) + 'px';
+            b.style.top = Math.max(5, y - camY - 18) + 'px';
+            vp.appendChild(b);
+            setTimeout(() => b.remove(), 2000);
         }
 
         // ===== ДВИЖЕНИЕ =====
         function moveChar() {
-            if(S.sleep){ requestAnimationFrame(moveChar); return; }
-            const mx=MAP_W-40, my=MAP_H-50, mn=20;
-            if(S.chase && !S.sleep){
-                targetX=mouseMapX-32; targetY=mouseMapY-40;
+            if (ST.sleep) { requestAnimationFrame(moveChar); return; }
+            
+            // В режиме охоты следует за камерой
+            if (ST.hunt && !ST.chase) {
+                const vw = vp.clientWidth, vh = vp.clientHeight;
+                targetX = camX + vw/2 - 28;
+                targetY = camY + vh/2 - 28;
             }
-            targetX=Math.max(mn,Math.min(mx,targetX));
-            targetY=Math.max(mn,Math.min(my,targetY));
-            const sp=S.chase?0.08:0.04;
-            charX+=(targetX-charX)*sp;
-            charY+=(targetY-charY)*sp;
-            const dx=targetX-charX;
-            if(Math.abs(dx)>2) charEl.classList.toggle('flip',dx<0);
-            charEl.style.left=(charX-camX)+'px';
-            charEl.style.top=(charY-camY)+'px';
+            
+            if (ST.chase && !ST.sleep) {
+                targetX = mouseMX - 28;
+                targetY = mouseMY - 35;
+            }
+            
+            if (ST.autoTarget) {
+                targetX = ST.autoTarget.x;
+                targetY = ST.autoTarget.y;
+            }
+            
+            const mx = MW - 50, my = MH - 45, mn = 25;
+            targetX = Math.max(mn, Math.min(mx, targetX));
+            targetY = Math.max(mn, Math.min(my, targetY));
+            
+            const sp = (ST.chase || ST.autoAction) ? 0.09 : 0.05;
+            charX += (targetX - charX) * sp;
+            charY += (targetY - charY) * sp;
+            
+            const dx = targetX - charX;
+            if (Math.abs(dx) > 2) charEl.classList.toggle('flip', dx < 0);
+            
+            charEl.style.left = (charX - camX) + 'px';
+            charEl.style.top = (charY - camY) + 'px';
+            
+            // Проверка прибытия к цели автономного действия
+            if (ST.autoTarget && Math.abs(charX - ST.autoTarget.x) < 15 && Math.abs(charY - ST.autoTarget.y) < 15) {
+                if (ST.autoAction === 'drink') {
+                    drinkWater();
+                } else if (ST.autoAction === 'hunt_prey') {
+                    catchAutoPrey();
+                }
+                ST.autoTarget = null;
+                ST.autoAction = null;
+            }
+            
             requestAnimationFrame(moveChar);
         }
 
         // ===== ПОГОНЯ =====
-        function startChase(){ if(S.chase||S.sleep)return; S.chase=true; charEl.classList.add('chasing'); addMem('ГОНИТСЯ!',true); }
-        function stopChase(){ S.chase=false; charEl.classList.remove('chasing'); }
+        function startChase() { if (ST.chase || ST.sleep) return; ST.chase = true; charEl.classList.add('chasing'); addMem('ГОНИТСЯ!', true); }
+        function stopChase() { ST.chase = false; charEl.classList.remove('chasing'); }
 
-        // ===== СОН =====
-        function goSleep(){
-            if(S.sleep){ wakeUp(); return; }
-            if(S.energy>80){ showMsg('НЕ ХОЧУ!',charX,charY-20); return; }
-            S.sleep=true; charEl.classList.add('sleeping'); setEmote('💤'); stopChase();
-            addMem('УСНУЛ'); showMsg('Zzz...',charX,charY-20);
-            document.querySelector('.btn:nth-child(5)').textContent='☀ ПРОСНУТЬСЯ';
-            setTimeout(wakeUp,20000);
-        }
-        function clickSleepRock(i,rx,ry){ targetX=rx+20; targetY=ry+10; setTimeout(goSleep,500); }
-        function wakeUp(){
-            S.sleep=false; charEl.classList.remove('sleeping');
-            S.energy=Math.min(100,S.energy+45); S.mood=Math.min(100,S.mood+18);
-            addMem('ПРОСНУЛСЯ'); showMsg('ЛАДНО...',charX,charY-20);
-            document.querySelector('.btn:nth-child(5)').textContent='💤 СПАТЬ';
+        // ===== ПИТЬЁ =====
+        function drinkWater() {
+            charEl.classList.add('drinking');
+            ST.thirst = Math.max(0, ST.thirst - 40);
+            ST.mood = Math.min(100, ST.mood + 8);
+            addMem('ПОПИЛ');
+            showMsg('Освежающе!', charX, charY - 18);
+            setTimeout(() => charEl.classList.remove('drinking'), 600);
             updStats();
         }
 
-        // ===== ОХОТА (УСЛОЖНЁННАЯ) =====
-        const PREY = ['🐔','🐑','🐇','🦆','🐖','🐄','🦌','🐐'];
-        let huntInterval;
-
-        function spawnPrey(){
-            if(!S.hunt||S.sleep||S.preyList.length>=6) return;
-            const p=document.createElement('div');
-            p.className='prey-sprite';
-            p.textContent=PREY[Math.floor(Math.random()*PREY.length)];
-            const px=100+Math.random()*(MAP_W-300), py=80+Math.random()*(MAP_H-250);
-            p.style.left=px+'px'; p.style.top=py+'px';
-            p.style.animationDuration=(3+Math.random()*5)+'s';
-            p.dataset.x=px; p.dataset.y=py;
-            p.dataset.clicks=0;
-            p.addEventListener('click',(e)=>{ e.stopPropagation(); huntPrey(p); });
-            worldMap.appendChild(p);
-            S.preyList.push(p);
-            setTimeout(()=>{ if(p.parentNode&&!p.classList.contains('caught')){p.remove(); S.preyList=S.preyList.filter(x=>x!==p);} },10000);
+        // ===== СОН =====
+        function doSleep() {
+            if (ST.sleep) { wakeUp(); return; }
+            if (ST.energy > 70) { showMsg('НЕ ХОЧУ СПАТЬ!', charX, charY - 18); return; }
+            ST.sleep = true;
+            charEl.classList.add('sleeping');
+            setEmote('💤');
+            stopChase();
+            ST.autoTarget = null;
+            ST.autoAction = null;
+            addMem('УСНУЛ');
+            showMsg('Zzz...', charX, charY - 18);
+            document.querySelector('.btn:nth-child(5)').textContent = '☀ ПРОСНУТЬСЯ';
+            setTimeout(wakeUp, 20000);
+        }
+        function clickSleep(i, rx, ry) {
+            targetX = rx + 15;
+            targetY = ry + 5;
+            setTimeout(() => doSleep(), 600);
+        }
+        function wakeUp() {
+            ST.sleep = false;
+            charEl.classList.remove('sleeping');
+            ST.energy = Math.min(100, ST.energy + 45);
+            ST.mood = Math.min(100, ST.mood + 18);
+            addMem('ПРОСНУЛСЯ');
+            showMsg('ЛАДНО, ВСТАЮ...', charX, charY - 18);
+            document.querySelector('.btn:nth-child(5)').textContent = '💤 СПАТЬ';
+            updStats();
         }
 
-        function huntPrey(prey){
-            if(!S.hunt||S.sleep||prey.classList.contains('caught')) return;
-            const clicks=parseInt(prey.dataset.clicks)+1;
-            prey.dataset.clicks=clicks;
+        // ===== ОХОТА =====
+        const PREY_TYPES = ['🐔','🐑','🐇','🦆','🐖','🐄','🦌','🐐'];
+        let huntTimer;
 
-            if(clicks===1){
-                // Первое нажатие — жертва убегает
+        function spawnPrey() {
+            if (!ST.hunt || ST.sleep || ST.preyList.length >= 7) return;
+            const p = document.createElement('div');
+            p.className = 'prey';
+            p.textContent = PREY_TYPES[Math.floor(Math.random() * PREY_TYPES.length)];
+            const px = 80 + Math.random() * (MW - 350);
+            const py = 60 + Math.random() * (MH - 300);
+            p.style.left = px + 'px';
+            p.style.top = py + 'px';
+            p.style.animationDuration = (2.5 + Math.random() * 4) + 's';
+            p.dataset.x = px;
+            p.dataset.y = py;
+            p.dataset.clicks = '0';
+            p.addEventListener('click', e => {
+                e.stopPropagation();
+                huntPrey(p);
+            });
+            mapEl.appendChild(p);
+            ST.preyList.push(p);
+            setTimeout(() => {
+                if (p.parentNode && !p.classList.contains('caught')) {
+                    p.remove();
+                    ST.preyList = ST.preyList.filter(x => x !== p);
+                }
+            }, 10000);
+        }
+
+        function huntPrey(prey) {
+            if (!ST.hunt || ST.sleep || prey.classList.contains('caught')) return;
+            const clicks = parseInt(prey.dataset.clicks) + 1;
+            prey.dataset.clicks = clicks;
+            
+            if (clicks === 1) {
                 prey.classList.add('fleeing');
-                const fx=(Math.random()-0.5)*300, fy=(Math.random()-0.5)*300;
-                prey.style.setProperty('--fx',fx+'px');
-                prey.style.setProperty('--fy',fy+'px');
-                const nx=parseFloat(prey.dataset.x)+fx, ny=parseFloat(prey.dataset.y)+fy;
-                prey.dataset.x=nx; prey.dataset.y=ny;
-                S.huntStamina=Math.max(0,S.huntStamina-20);
-                showMsg('УБЕГАЕТ! ЖМИ ЕЩЁ!',charX,charY-20);
-                targetX=nx; targetY=ny;
-                setTimeout(()=>{ prey.classList.remove('fleeing'); },800);
-            } else if(clicks>=2){
-                // Второе нажатие — поймали
+                const fx = (Math.random() - 0.5) * 280;
+                const fy = (Math.random() - 0.5) * 280;
+                prey.style.setProperty('--fx', fx + 'px');
+                prey.style.setProperty('--fy', fy + 'px');
+                const nx = parseFloat(prey.dataset.x) + fx;
+                const ny = parseFloat(prey.dataset.y) + fy;
+                prey.dataset.x = nx;
+                prey.dataset.y = ny;
+                targetX = nx;
+                targetY = ny;
+                ST.energy = Math.max(0, ST.energy - 3);
+                showMsg('УБЕГАЕТ! ЖМИ ЕЩЁ!', charX, charY - 18);
+                setTimeout(() => prey.classList.remove('fleeing'), 700);
+            } else if (clicks >= 2) {
                 prey.classList.add('caught');
-                const mx=parseFloat(prey.dataset.x), my=parseFloat(prey.dataset.y);
-                const meat=document.createElement('div');
-                meat.className='meat-drop';
-                meat.textContent='🥩';
-                meat.style.left=mx+'px'; meat.style.top=my+'px';
-                meat.addEventListener('click',(e)=>{e.stopPropagation(); eatMeat(meat);});
-                worldMap.appendChild(meat);
-                S.meatList.push(meat);
-                S.mood=Math.min(100,S.mood+18);
-                addMem('ПОЙМАЛ!');
-                showMsg('ПОПАЛСЯ!',mx,my-20);
-                setTimeout(()=>{prey.remove(); S.preyList=S.preyList.filter(x=>x!==prey);},500);
+                const mx = parseFloat(prey.dataset.x);
+                const my = parseFloat(prey.dataset.y);
+                const meat = document.createElement('div');
+                meat.className = 'meat';
+                meat.textContent = '🥩';
+                meat.style.left = mx + 'px';
+                meat.style.top = my + 'px';
+                meat.addEventListener('click', e => {
+                    e.stopPropagation();
+                    eatMeat(meat);
+                });
+                mapEl.appendChild(meat);
+                ST.meatList.push(meat);
+                ST.mood = Math.min(100, ST.mood + 18);
+                addMem('ПОЙМАЛ ДОБЫЧУ!');
+                showMsg('ПОПАЛСЯ!', mx, my - 18);
+                setTimeout(() => {
+                    prey.remove();
+                    ST.preyList = ST.preyList.filter(x => x !== prey);
+                }, 400);
                 charEl.classList.add('hunting');
-                setTimeout(()=>charEl.classList.remove('hunting'),700);
+                setTimeout(() => charEl.classList.remove('hunting'), 700);
             }
             updStats();
         }
 
-        function eatMeat(meat){
-            if(!meat.parentNode||S.sleep) return;
-            const mx=parseFloat(meat.style.left), my=parseFloat(meat.style.top);
-            targetX=mx; targetY=my;
-            setTimeout(()=>{
-                charEl.classList.add('eating');
-                meat.remove(); S.meatList=S.meatList.filter(m=>m!==meat);
-                S.hunger=Math.max(0,S.hunger-25); S.energy=Math.min(100,S.energy+10); S.mood=Math.min(100,S.mood+12);
-                addMem('СЪЕЛ МЯСО'); showMsg('ВКУСНО!',mx,my-20);
-                updStats();
-                setTimeout(()=>charEl.classList.remove('eating'),400);
-            },300);
+        function catchAutoPrey() {
+            if (ST.preyList.length === 0) return;
+            const prey = ST.preyList[0];
+            if (!prey || prey.classList.contains('caught')) return;
+            prey.dataset.clicks = '2';
+            huntPrey(prey);
         }
 
-        function toggleHunt(){
-            if(S.sleep){ showMsg('Zzz...',charX,charY-20); return; }
-            S.hunt=!S.hunt;
-            if(S.hunt){
-                huntBtn.textContent='⚔ ОХОТА ON'; huntBtn.classList.add('on');
-                stopChase(); S.huntStamina=100;
-                addMem('ОХОТА!'); showMsg('ВРЕМЯ ОХОТЫ!',charX,charY-20);
-                huntInterval=setInterval(spawnPrey,2000);
+        function eatMeat(meat) {
+            if (!meat.parentNode || ST.sleep) return;
+            const mx = parseFloat(meat.style.left);
+            const my = parseFloat(meat.style.top);
+            targetX = mx;
+            targetY = my;
+            setTimeout(() => {
+                charEl.classList.add('eating');
+                meat.remove();
+                ST.meatList = ST.meatList.filter(m => m !== meat);
+                ST.hunger = Math.max(0, ST.hunger - 25);
+                ST.energy = Math.min(100, ST.energy + 10);
+                ST.mood = Math.min(100, ST.mood + 12);
+                addMem('СЪЕЛ МЯСО');
+                showMsg('ВКУСНО!', mx, my - 18);
+                updStats();
+                setTimeout(() => charEl.classList.remove('eating'), 400);
+            }, 300);
+        }
+
+        function toggleHunt() {
+            if (ST.sleep) { showMsg('Zzz...', charX, charY - 18); return; }
+            ST.hunt = !ST.hunt;
+            if (ST.hunt) {
+                huntBtn.textContent = '⚔ ОХОТА ON';
+                huntBtn.classList.add('on');
+                stopChase();
+                ST.autoTarget = null;
+                ST.autoAction = null;
+                addMem('РЕЖИМ ОХОТЫ');
+                showMsg('ВРЕМЯ ОХОТЫ!', charX, charY - 18);
+                huntTimer = setInterval(spawnPrey, 2000);
                 spawnPrey();
             } else {
-                huntBtn.textContent='⚔ ОХОТА'; huntBtn.classList.remove('on');
-                clearInterval(huntInterval);
-                S.preyList.forEach(p=>p.remove()); S.preyList=[];
-                S.meatList.forEach(m=>m.remove()); S.meatList=[];
-                addMem('ОХОТА КОНЧИЛАСЬ');
+                huntBtn.textContent = '⚔ ОХОТА';
+                huntBtn.classList.remove('on');
+                clearInterval(huntTimer);
+                ST.preyList.forEach(p => p.remove());
+                ST.preyList = [];
+                ST.meatList.forEach(m => m.remove());
+                ST.meatList = [];
+                addMem('ОХОТА ЗАКОНЧЕНА');
                 updStats();
             }
         }
 
         // ===== ВЗАИМОДЕЙСТВИЯ =====
-        function pet(){
-            if(S.sleep){ showMsg('Zzz...',charX,charY-20); return; }
-            if(S.mood<30){ showMsg('НЕ ТРОГАЙ!',charX,charY-20); targetX=charX+(Math.random()-0.5)*200; targetY=charY+(Math.random()-0.5)*150; S.mood=Math.max(0,S.mood-10); addMem('УДАРИЛ',true); }
-            else if(S.mood<60){ showMsg('ЛАДНО...',charX,charY-20); S.mood=Math.min(100,S.mood+5); S.energy=Math.max(0,S.energy-5); addMem('ТЕРПЕЛ'); }
-            else { showMsg('МРР...',charX,charY-20); S.mood=Math.min(100,S.mood+8); addMem('ПОНРАВИЛОСЬ'); }
+        function doPet() {
+            if (ST.sleep) { showMsg('Zzz...', charX, charY - 18); return; }
+            ST.autoTarget = null;
+            ST.autoAction = null;
+            if (ST.mood < 30) {
+                showMsg('НЕ ТРОГАЙ МЕНЯ!', charX, charY - 18);
+                targetX = charX + (Math.random() - 0.5) * 200;
+                targetY = charY + (Math.random() - 0.5) * 150;
+                ST.mood = Math.max(0, ST.mood - 10);
+                addMem('УДАРИЛ ЗА ЛАСКУ', true);
+            } else if (ST.mood < 60) {
+                showMsg('ЛАДНО... ОДИН РАЗ', charX, charY - 18);
+                ST.mood = Math.min(100, ST.mood + 5);
+                ST.energy = Math.max(0, ST.energy - 5);
+                addMem('ПОТЕРПЕЛ ЛАСКУ');
+            } else {
+                showMsg('МРР... ЕЩЁ?', charX, charY - 18);
+                ST.mood = Math.min(100, ST.mood + 8);
+                addMem('ПОНРАВИЛОСЬ!');
+            }
             updStats();
         }
-        function feed(){
-            if(S.sleep){ showMsg('Zzz...',charX,charY-20); return; }
-            const meat=document.createElement('div');
-            meat.className='meat-drop'; meat.textContent='🥩';
-            meat.style.left=(charX+20)+'px'; meat.style.top=(charY+20)+'px';
-            meat.addEventListener('click',(e)=>{e.stopPropagation(); eatMeat(meat);});
-            worldMap.appendChild(meat); S.meatList.push(meat);
-            showMsg('ДЕРЖИ',charX,charY-20); addMem('ПОЛУЧИЛ МЯСО');
-            setTimeout(()=>{if(meat.parentNode)eatMeat(meat);},2000);
-        }
-        function play(){
-            if(S.sleep){ showMsg('Zzz...',charX,charY-20); return; }
-            if(S.energy<15){ showMsg('УСТАЛ...',charX,charY-20); addMem('ОТКАЗАЛСЯ'); return; }
-            targetX=Math.random()*(MAP_W-200)+100; targetY=Math.random()*(MAP_H-200)+80;
-            S.energy=Math.max(0,S.energy-15); S.mood=Math.min(100,S.mood+(S.mood<50?5:12));
-            showMsg('ДОГОНЯЙ!',charX,charY-20); addMem('ИГРАЛ'); updStats();
+
+        function doFeed() {
+            if (ST.sleep) { showMsg('Zzz...', charX, charY - 18); return; }
+            ST.autoTarget = null;
+            ST.autoAction = null;
+            const meat = document.createElement('div');
+            meat.className = 'meat';
+            meat.textContent = '🥩';
+            meat.style.left = (charX + 18) + 'px';
+            meat.style.top = (charY + 18) + 'px';
+            meat.addEventListener('click', e => {
+                e.stopPropagation();
+                eatMeat(meat);
+            });
+            mapEl.appendChild(meat);
+            ST.meatList.push(meat);
+            showMsg('ДЕРЖИ МЯСО', charX, charY - 18);
+            addMem('ПОЛУЧИЛ МЯСО');
+            setTimeout(() => {
+                if (meat.parentNode) eatMeat(meat);
+            }, 2000);
         }
 
-        // ===== МЫШЬ ДЛЯ КАРТЫ =====
-        viewport.addEventListener('mousemove', (e) => {
-            if(isDragging) return;
-            const r=viewport.getBoundingClientRect();
-            mouseMapX=e.clientX-r.left+camX;
-            mouseMapY=e.clientY-r.top+camY;
+        function doPlay() {
+            if (ST.sleep) { showMsg('Zzz...', charX, charY - 18); return; }
+            ST.autoTarget = null;
+            ST.autoAction = null;
+            if (ST.energy < 15) {
+                showMsg('СЛИШКОМ УСТАЛ...', charX, charY - 18);
+                addMem('ОТКАЗАЛСЯ ИГРАТЬ');
+                return;
+            }
+            targetX = Math.random() * (MW - 200) + 100;
+            targetY = Math.random() * (MH - 200) + 80;
+            ST.energy = Math.max(0, ST.energy - 15);
+            ST.mood = Math.min(100, ST.mood + (ST.mood < 50 ? 5 : 12));
+            showMsg('ДОГОНЯЙ!', charX, charY - 18);
+            addMem('ПОИГРАЛ');
+            updStats();
+        }
+
+        // ===== АВТОНОМНОЕ ПОВЕДЕНИЕ =====
+        function autonomousBehavior() {
+            if (ST.sleep || ST.hunt || ST.chase || ST.autoAction) return;
+            
+            // Жажда — идёт к реке
+            if (ST.thirst > 60 && nearRiver() && ST.energy > 10) {
+                ST.autoTarget = { x: charX, y: charY };
+                ST.autoAction = 'drink';
+                return;
+            }
+            if (ST.thirst > 75 && ST.energy > 15) {
+                // Идём к ближайшей реке
+                const rz = riverZones[0];
+                ST.autoTarget = { x: rz.x + rz.w/2, y: rz.y + 100 };
+                ST.autoAction = 'drink';
+                return;
+            }
+            
+            // Голод — самостоятельная охота
+            if (ST.hunger > 70 && ST.energy > 20 && ST.preyList.length === 0 && !ST.hunt) {
+                ST.hunt = true;
+                huntBtn.textContent = '⚔ ОХОТА ON';
+                huntBtn.classList.add('on');
+                addMem('САМ НАЧАЛ ОХОТУ');
+                showMsg('Я САМ ПООХОЧУСЬ!', charX, charY - 18);
+                huntTimer = setInterval(spawnPrey, 2000);
+                spawnPrey();
+                // Автоохота на 15 секунд
+                setTimeout(() => {
+                    if (ST.hunt && ST.hunger < 50) {
+                        ST.hunt = false;
+                        huntBtn.textContent = '⚔ ОХОТА';
+                        huntBtn.classList.remove('on');
+                        clearInterval(huntTimer);
+                        ST.preyList.forEach(p => p.remove());
+                        ST.preyList = [];
+                        ST.meatList.forEach(m => m.remove());
+                        ST.meatList = [];
+                        addMem('ЗАКОНЧИЛ ОХОТУ');
+                    }
+                }, 15000);
+                return;
+            }
+            
+            // Случайное перемещение
+            if (Math.random() < 0.15 && !ST.hunt) {
+                const rx = charX + (Math.random() - 0.5) * 600;
+                const ry = charY + (Math.random() - 0.5) * 400;
+                targetX = Math.max(50, Math.min(MW - 80, rx));
+                targetY = Math.max(50, Math.min(MH - 70, ry));
+            }
+        }
+
+        // ===== ОТСЛЕЖИВАНИЕ МЫШИ =====
+        vp.addEventListener('mousemove', e => {
+            if (dragging) return;
+            const r = vp.getBoundingClientRect();
+            mouseMX = e.clientX - r.left + camX;
+            mouseMY = e.clientY - r.top + camY;
         });
 
-        viewport.addEventListener('click', (e) => {
-            if(isDragging) return;
-            if(e.target===viewport||e.target===worldMap||e.target.classList.contains('ground-layer')){
-                if(S.chase && !S.hunt){ stopChase(); showMsg('НАДОЕЛО...',charX,charY-20); }
+        vp.addEventListener('click', e => {
+            if (dragging) return;
+            if (e.target === vp || e.target === mapEl || e.target.classList.contains('dirt-pattern')) {
+                if (ST.chase && !ST.hunt && !ST.sleep) {
+                    stopChase();
+                    showMsg('НАДОЕЛО...', charX, charY - 18);
+                }
             }
         });
 
-        // ===== ПАССИВ =====
-        setInterval(()=>{
-            if(S.sleep){ S.energy=Math.min(100,S.energy+1.5); S.hunger=Math.min(100,S.hunger+0.15); S.mood=Math.min(100,S.mood+0.3); updStats(); return; }
-            S.hunger=Math.min(100,S.hunger+0.5);
-            if(!S.hunt&&!S.chase) S.energy=Math.min(100,S.energy+0.2);
-            if(S.hunt) S.energy=Math.max(0,S.energy-0.35);
-            if(S.chase) S.energy=Math.max(0,S.energy-0.3);
-            if(S.hunger>70) S.mood=Math.max(0,S.mood-0.25);
-            if(S.energy<15) S.mood=Math.max(0,S.mood-0.35);
-            if(S.hunger>85&&!S.chase&&S.energy>20&&!S.sleep&&S.mood<35) startChase();
-            if(S.energy<5&&S.chase){ stopChase(); showMsg('ВЫДОХСЯ...',charX,charY-20); }
+        // ===== ПАССИВНЫЕ ЭФФЕКТЫ =====
+        setInterval(() => {
+            if (ST.sleep) {
+                ST.energy = Math.min(100, ST.energy + 1.5);
+                ST.hunger = Math.min(100, ST.hunger + 0.1);
+                ST.thirst = Math.min(100, ST.thirst + 0.2);
+                ST.mood = Math.min(100, ST.mood + 0.3);
+                updStats();
+                return;
+            }
+            
+            ST.hunger = Math.min(100, ST.hunger + 0.4);
+            ST.thirst = Math.min(100, ST.thirst + 0.35);
+            
+            if (!ST.hunt && !ST.chase) ST.energy = Math.min(100, ST.energy + 0.2);
+            if (ST.hunt) ST.energy = Math.max(0, ST.energy - 0.3);
+            if (ST.chase) ST.energy = Math.max(0, ST.energy - 0.25);
+            
+            if (ST.hunger > 70) ST.mood = Math.max(0, ST.mood - 0.2);
+            if (ST.thirst > 70) ST.mood = Math.max(0, ST.mood - 0.25);
+            if (ST.energy < 15) ST.mood = Math.max(0, ST.mood - 0.3);
+            
+            if (ST.hunger > 85 && !ST.chase && ST.energy > 20 && !ST.sleep && ST.mood < 35) startChase();
+            if (ST.energy < 5 && ST.chase) {
+                stopChase();
+                showMsg('ВЫДОХСЯ...', charX, charY - 18);
+            }
+            
             updStats();
-        },2000);
+        }, 1800);
+
+        // Автономное поведение
+        setInterval(() => {
+            autonomousBehavior();
+        }, 5000);
 
         // ===== СТАРТ =====
-        function init(){
-            buildPixelMap();
-            charEl.style.left=(charX-camX)+'px';
-            charEl.style.top=(charY-camY)+'px';
+        function init() {
+            buildMap();
+            charEl.style.left = (charX - camX) + 'px';
+            charEl.style.top = (charY - camY) + 'px';
             setEmote('😼');
-            updateCamera();
+            updateCam();
             moveChar();
-            addMem('ПОЯВИЛСЯ');
+            addMem('ПОЯВИЛСЯ В САВАННЕ');
             updStats();
-            setTimeout(()=>showMsg('ЧТО СМОТРИШЬ?',charX,charY-20),1500);
+            setTimeout(() => showMsg('ЧТО СМОТРИШЬ?', charX, charY - 18), 1500);
+            setTimeout(() => showMsg('Я ТУТ ГЛАВНЫЙ!', charX + 20, charY - 35), 3500);
         }
 
-        window.addEventListener('beforeunload',()=>{
-            try{sessionStorage.setItem('fff_save',JSON.stringify({h:S.hunger,e:S.energy,m:S.mood,mem:S.memory.slice(-10)}));}catch(e){}
+        window.addEventListener('beforeunload', () => {
+            try {
+                sessionStorage.setItem('fff_save2', JSON.stringify({
+                    h: ST.hunger, t: ST.thirst, e: ST.energy, m: ST.mood,
+                    mem: ST.memory.slice(-10),
+                    x: charX, y: charY, cx: camX, cy: camY
+                }));
+            } catch(e) {}
         });
-        try{
-            const sv=sessionStorage.getItem('fff_save');
-            if(sv){ const d=JSON.parse(sv); S.hunger=d.h||70; S.energy=d.e||80; S.mood=d.m||40; if(d.mem)S.memory=d.mem; }
-        }catch(e){}
+
+        try {
+            const sv = sessionStorage.getItem('fff_save2');
+            if (sv) {
+                const d = JSON.parse(sv);
+                ST.hunger = d.h || 70;
+                ST.thirst = d.t || 60;
+                ST.energy = d.e || 80;
+                ST.mood = d.m || 45;
+                if (d.mem) ST.memory = d.mem;
+                if (d.x) charX = d.x;
+                if (d.y) charY = d.y;
+                if (d.cx) camX = d.cx;
+                if (d.cy) camY = d.cy;
+                targetX = charX;
+                targetY = charY;
+            }
+        } catch(e) {}
 
         init();
-        console.log('🦁 FFF — САВАННА ЗАГРУЖЕНА');
+        console.log('🦁 FFF — ДИКАЯ САВАННА ЗАГРУЖЕНА');
     </script>
 </body>
 </html>
