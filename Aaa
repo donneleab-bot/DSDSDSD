@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Надменный Лев — FFF</title>
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --panel: #16213e;
+            --text: #e0e0e0;
+            --accent: #e94560;
+            --gold: #d4a574;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            position: relative;
+        }
+
+        /* Игровая зона */
+        .game-area {
+            width: 600px;
+            height: 450px;
+            background: linear-gradient(180deg, #2d5a27 0%, #1a3a18 40%, #8b6914 40%, #6b4f12 100%);
+            border-radius: 24px;
+            border: 3px solid #3a3a5c;
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Трава */
+        .grass-layer {
+            position: absolute;
+            bottom: 60%;
+            left: 0;
+            right: 0;
+            height: 15px;
+            background: repeating-linear-gradient(90deg, transparent, transparent 15px, #3a7a30 15px, #3a7a30 18px);
+            z-index: 1;
+        }
+
+        /* Персонаж */
+        .character {
+            position: absolute;
+            z-index: 10;
+            pointer-events: none;
+            transition: all 0.15s ease-out;
+            transform-origin: center bottom;
+            width: 80px;
+            height: 80px;
+        }
+
+        .character img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(3px 5px 3px rgba(0,0,0,0.4));
+            image-rendering: auto;
+        }
+
+        .character.chasing {
+            animation: chaseWiggle 0.3s infinite;
+        }
+
+        .character.eating {
+            animation: nomNom 0.4s ease-in-out;
+        }
+
+        .character.angry img {
+            animation: angryShake 0.5s infinite;
+            filter: drop-shadow(3px 5px 3px rgba(255,0,0,0.6)) brightness(1.2) !important;
+        }
+
+        .character.hunting {
+            animation: huntPounce 0.6s ease-out;
+        }
+
+        /* Отражение по горизонтали */
+        .character.flip img {
+            transform: scaleX(-1);
+        }
+
+        @keyframes chaseWiggle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes nomNom {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.25); }
+            60% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes angryShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px) rotate(-5deg); }
+            75% { transform: translateX(8px) rotate(5deg); }
+        }
+
+        @keyframes huntPounce {
+            0% { transform: scale(1); }
+            40% { transform: scale(0.7, 1.2); }
+            70% { transform: scale(1.3, 0.8) translateY(-30px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+
+        /* Эмодзи-добыча */
+        .prey-emoji {
+            position: absolute;
+            font-size: 35px;
+            pointer-events: auto;
+            z-index: 5;
+            cursor: pointer;
+            animation: preyMove 8s linear infinite;
+            transition: all 0.3s;
+        }
+
+        .prey-emoji:hover {
+            transform: scale(1.3);
+            filter: brightness(1.3);
+        }
+
+        .prey-emoji.caught {
+            animation: caughtFade 0.5s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes preyMove {
+            0% { 
+                transform: translate(0, 0) scale(1);
+            }
+            25% { 
+                transform: translate(80px, -40px) scale(1.1);
+            }
+            50% { 
+                transform: translate(40px, -20px) scale(0.9);
+            }
+            75% { 
+                transform: translate(-30px, -50px) scale(1.05);
+            }
+            100% { 
+                transform: translate(0, 0) scale(1);
+            }
+        }
+
+        @keyframes caughtFade {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.3); }
+            100% { opacity: 0; transform: scale(0) translateY(-50px); }
+        }
+
+        /* Мясо */
+        .meat-piece {
+            position: absolute;
+            font-size: 30px;
+            z-index: 6;
+            pointer-events: auto;
+            cursor: pointer;
+            animation: meatDrop 0.5s ease-out;
+            filter: drop-shadow(0 3px 3px rgba(0,0,0,0.5));
+        }
+
+        .meat-piece:hover {
+            transform: scale(1.3);
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.7)) brightness(1.3);
+        }
+
+        @keyframes meatDrop {
+            0% { transform: translateY(-50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Курсор-лазер (для режима погони) */
+        .cursor-laser {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent);
+            display: none;
+        }
+
+        /* Панель статуса */
+        .stats-panel {
+            background: var(--panel);
+            border-radius: 20px;
+            padding: 20px 30px;
+            border: 2px solid #3a3a5c;
+            width: 600px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-label {
+            color: #aaa;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-bar {
+            height: 12px;
+            background: #2a2a4a;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #3a3a5c;
+        }
+
+        .stat-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .stat-fill.hunger { background: linear-gradient(90deg, #e94560, #ff6b6b); }
+        .stat-fill.energy { background: linear-gradient(90deg, #4ecdc4, #44bd9e); }
+        .stat-fill.mood { background: linear-gradient(90deg, #ffd93d, #ff9f43); }
+
+        .stat-value {
+            color: var(--text);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* Кнопки взаимодействия */
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: var(--panel);
+            color: var(--text);
+            border: 2px solid #3a3a5c;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            background: #2a2a5a;
+            border-color: #5a5a8c;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .btn.pet { border-color: #ff9f43; }
+        .btn.feed { border-color: #e94560; }
+        .btn.play { border-color: #4ecdc4; }
+        .btn.hunt-mode { border-color: #ff6b6b; background: #3a1020; }
+
+        /* Режим охоты */
+        .game-area.hunt-mode {
+            border-color: #ff4444;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.4), 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Сообщения */
+        .message-bubble {
+            position: absolute;
+            background: white;
+            color: #1a1a2e;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 20;
+            pointer-events: none;
+            animation: bubbleFloat 2s ease-out forwards;
+            white-space: nowrap;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .message-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid white;
+        }
+
+        @keyframes bubbleFloat {
+            0% { opacity: 0; transform: translateY(10px); }
+            20% { opacity: 1; transform: translateY(-30px); }
+            80% { opacity: 1; transform: translateY(-50px); }
+            100% { opacity: 0; transform: translateY(-80px); }
+        }
+
+        .title {
+            color: var(--gold);
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(212, 167, 116, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .memory-log {
+            background: var(--panel);
+            border-radius: 12px;
+            padding: 12px 20px;
+            border: 1px solid #3a3a5c;
+            width: 600px;
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 11px;
+            color: #888;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .memory-tag {
+            background: #2a2a4a;
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .fallback-emoji {
+            font-size: 60px;
+            display: none;
+        }
+
+        @media (max-width: 650px) {
+            .game-area, .stats-panel, .memory-log {
+                width: 95vw;
+            }
+            .btn {
+                padding: 8px 14px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">🦁 Надменный Лев</div>
+
+        <!-- Игровая зона -->
+        <div class="game-area" id="gameArea">
+            <div class="grass-layer"></div>
+            <div class="character" id="character">
+                <img src="FFF.png" alt="Лев FFF" id="charImage" onerror="handleImageError()">
+                <span class="fallback-emoji" id="fallbackEmoji">🦁</span>
+            </div>
+            <div class="cursor-laser" id="cursorLaser"></div>
+        </div>
+
+        <!-- Статус -->
+        <div class="stats-panel" id="statsPanel">
+            <div class="stat">
+                <div class="stat-label">🍖 Голод</div>
+                <div class="stat-bar"><div class="stat-fill hunger" id="hungerBar" style="width: 70%"></div></div>
+                <div class="stat-value" id="hungerValue">70%</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">⚡ Энергия</div>
+                <div class="stat-bar"><div class="stat-fill energy" id="energyBar" style="width: 80%"></div></div>
+                <div class="stat-value" id="energyValue">80%</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">😾 Настроение</div>
+                <div class="stat-bar"><div class="stat-fill mood" id="moodBar" style="width: 40%"></div></div>
+                <div class="stat-value" id="moodValue">40%</div>
+            </div>
+        </div>
+
+        <!-- Кнопки -->
+        <div class="actions">
+            <button class="btn pet" onclick="petLion()">✋ Погладить</button>
+            <button class="btn feed" onclick="feedLion()">🍖 Покормить</button>
+            <button class="btn play" onclick="playWithLion()">🎾 Поиграть</button>
+            <button class="btn hunt-mode" id="huntBtn" onclick="toggleHuntMode()">🎯 Режим охоты</button>
+        </div>
+
+        <!-- Память -->
+        <div class="memory-log" id="memoryLog">
+            <span style="color:#666;">Память:</span>
+        </div>
+    </div>
+
+    <script>
+        // ===== ОБРАБОТКА ОШИБКИ ЗАГРУЗКИ ИЗОБРАЖЕНИЯ =====
+        function handleImageError() {
+            document.getElementById('charImage').style.display = 'none';
+            document.getElementById('fallbackEmoji').style.display = 'block';
+            console.warn('Изображение FFF.png не найдено. Используется эмодзи-заглушка.');
+            showMessage('🦁 Где моя картинка?!', charX, charY - 40);
+        }
+
+        // ===== СОСТОЯНИЕ ПЕРСОНАЖА =====
+        const state = {
+            hunger: 70,        // 0 = сытый, 100 = умирает с голоду
+            energy: 80,       // 0 = истощен, 100 = полон сил
+            mood: 40,         // 0 = в ярости, 100 = доволен (но он всегда немного зол)
+            huntMode: false,
+            chasingCursor: false,
+            memory: [],       // История взаимодействий
+            preyList: [],     // Активные эмодзи-жертвы
+            meatPieces: [],   // Мясо на поле
+        };
+
+        // ===== DOM ЭЛЕМЕНТЫ =====
+        const gameArea = document.getElementById('gameArea');
+        const character = document.getElementById('character');
+        const cursorLaser = document.getElementById('cursorLaser');
+        const huntBtn = document.getElementById('huntBtn');
+        const memoryLog = document.getElementById('memoryLog');
+
+        // Позиция персонажа
+        let charX = 250;
+        let charY = 200;
+        let targetX = 250;
+        let targetY = 200;
+        let mouseX = 300;
+        let mouseY = 200;
+        let animationFrame;
+
+        // ===== ФУНКЦИИ ОБНОВЛЕНИЯ СТАТУСА =====
+        function updateStats() {
+            state.hunger = Math.max(0, Math.min(100, state.hunger));
+            state.energy = Math.max(0, Math.min(100, state.energy));
+            state.mood = Math.max(0, Math.min(100, state.mood));
+
+            document.getElementById('hungerBar').style.width = state.hunger + '%';
+            document.getElementById('energyBar').style.width = state.energy + '%';
+            document.getElementById('moodBar').style.width = state.mood + '%';
+            
+            document.getElementById('hungerValue').textContent = Math.round(state.hunger) + '%';
+            document.getElementById('energyValue').textContent = Math.round(state.energy) + '%';
+            document.getElementById('moodValue').textContent = Math.round(state.mood) + '%';
+
+            if (state.hunger > 80) {
+                character.classList.add('angry');
+                if (!state.memory.includes('голоден')) addMemory('😡 голоден');
+            } else if (state.hunger < 30) {
+                character.classList.remove('angry');
+            }
+
+            if (state.energy < 20) {
+                if (!state.memory.includes('устал')) addMemory('😴 устал');
+            }
+
+            if (state.mood < 20) {
+                if (!state.memory.includes('в ярости')) addMemory('💢 в ярости');
+                if (!state.chasingCursor && state.energy > 30) {
+                    startChasingCursor();
+                }
+            }
+        }
+
+        // ===== ПАМЯТЬ =====
+        function addMemory(action) {
+            const time = new Date().toLocaleTimeString();
+            const entry = `${time}: ${action}`;
+            
+            if (state.memory.length > 0 && state.memory[state.memory.length - 1].includes(action)) {
+                return;
+            }
+            
+            state.memory.push(entry);
+            if (state.memory.length > 20) state.memory.shift();
+            
+            updateMemoryDisplay();
+        }
+
+        function updateMemoryDisplay() {
+            const recent = state.memory.slice(-8);
+            memoryLog.innerHTML = '<span style="color:#666;">Память:</span>' + 
+                recent.map(m => `<span class="memory-tag">${m}</span>`).join('');
+        }
+
+        // ===== СООБЩЕНИЯ =====
+        function showMessage(text, x, y) {
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = text;
+            bubble.style.left = x + 'px';
+            bubble.style.top = y + 'px';
+            gameArea.appendChild(bubble);
+            
+            setTimeout(() => bubble.remove(), 2000);
+        }
+
+        // ===== ДВИЖЕНИЕ ПЕРСОНАЖА =====
+        function moveCharacter() {
+            const gameRect = gameArea.getBoundingClientRect();
+            const maxX = gameRect.width - 80;
+            const maxY = gameRect.height - 80;
+            const minX = 10;
+            const minY = 50;
+
+            if (state.chasingCursor && state.huntMode) {
+                targetX = mouseX - 40;
+                targetY = mouseY - 50;
+            }
+
+            targetX = Math.max(minX, Math.min(maxX, targetX));
+            targetY = Math.max(minY, Math.min(maxY, targetY));
+
+            const speed = state.chasingCursor ? 0.12 : 0.06;
+            charX += (targetX - charX) * speed;
+            charY += (targetY - charY) * speed;
+
+            // Отражение (смотрит в сторону движения)
+            const dx = targetX - charX;
+            if (Math.abs(dx) > 2) {
+                if (dx > 0) {
+                    character.classList.remove('flip');
+                } else {
+                    character.classList.add('flip');
+                }
+            }
+
+            character.style.left = charX + 'px';
+            character.style.top = charY + 'px';
+
+            if (state.chasingCursor) {
+                cursorLaser.style.display = 'block';
+                cursorLaser.style.left = (mouseX - 6) + 'px';
+                cursorLaser.style.top = (mouseY - 6) + 'px';
+            } else {
+                cursorLaser.style.display = 'none';
+            }
+
+            animationFrame = requestAnimationFrame(moveCharacter);
+        }
+
+        // ===== ПОГОНЯ ЗА КУРСОРОМ =====
+        function startChasingCursor() {
+            if (state.chasingCursor) return;
+            state.chasingCursor = true;
+            character.classList.add('chasing');
+            addMemory('🏃 гонится за курсором');
+            showMessage('😾 ХВАТИТ!', charX, charY - 40);
+        }
+
+        function stopChasingCursor() {
+            state.chasingCursor = false;
+            character.classList.remove('chasing');
+            cursorLaser.style.display = 'none';
+        }
+
+        // ===== ОХОТА НА ЭМОДЗИ =====
+        const preyEmojis = ['🐔', '🐑', '🐇', '🦆', '🐟', '🐖', '🐄', '🦌', '🐐', '🦃'];
+        const meatEmoji = '🥩';
+
+        function spawnPrey() {
+            if (!state.huntMode) return;
+            if (state.preyList.length >= 4) return;
+
+            const gameRect = gameArea.getBoundingClientRect();
+            const prey = document.createElement('div');
+            prey.className = 'prey-emoji';
+            prey.textContent = preyEmojis[Math.floor(Math.random() * preyEmojis.length)];
+            prey.style.left = (Math.random() * (gameRect.width - 80) + 20) + 'px';
+            prey.style.top = (Math.random() * (gameRect.height - 120) + 40) + 'px';
+            prey.dataset.spawnTime = Date.now();
+            
+            prey.style.animationDuration = (6 + Math.random() * 8) + 's';
+            prey.style.animationDelay = Math.random() * 2 + 's';
+            
+            prey.addEventListener('click', (e) => catchPrey(prey, e));
+            gameArea.appendChild(prey);
+            state.preyList.push(prey);
+
+            setTimeout(() => {
+                if (prey.parentNode && !prey.classList.contains('caught')) {
+                    prey.remove();
+                    state.preyList = state.preyList.filter(p => p !== prey);
+                }
+            }, 15000);
+        }
+
+        function catchPrey(preyElement, event) {
+            if (!state.huntMode || preyElement.classList.contains('caught')) return;
+            
+            preyElement.classList.add('caught');
+            character.classList.add('hunting');
+            
+            const meat = document.createElement('div');
+            meat.className = 'meat-piece';
+            meat.textContent = meatEmoji;
+            meat.style.left = preyElement.style.left;
+            meat.style.top = preyElement.style.top;
+            meat.addEventListener('click', (e) => {
+                e.stopPropagation();
+                eatMeat(meat);
+            });
+            
+            gameArea.appendChild(meat);
+            state.meatPieces.push(meat);
+            
+            setTimeout(() => {
+                preyElement.remove();
+                state.preyList = state.preyList.filter(p => p !== preyElement);
+            }, 500);
+
+            const meatLeft = parseFloat(meat.style.left);
+            const meatTop = parseFloat(meat.style.top);
+            targetX = meatLeft;
+            targetY = meatTop;
+            
+            state.mood = Math.min(100, state.mood + 15);
+            addMemory('🎯 поймал добычу!');
+            showMessage('😼 Попался!', meatLeft, meatTop - 30);
+            
+            setTimeout(() => character.classList.remove('hunting'), 600);
+            updateStats();
+        }
+
+        function eatMeat(meatElement) {
+            if (!meatElement.parentNode) return;
+            
+            const meatLeft = parseFloat(meatElement.style.left);
+            const meatTop = parseFloat(meatElement.style.top);
+            
+            targetX = meatLeft;
+            targetY = meatTop;
+            
+            setTimeout(() => {
+                character.classList.add('eating');
+                meatElement.remove();
+                state.meatPieces = state.meatPieces.filter(m => m !== meatElement);
+                
+                state.hunger = Math.max(0, state.hunger - 25);
+                state.energy = Math.min(100, state.energy + 10);
+                state.mood = Math.min(100, state.mood + 10);
+                
+                addMemory('🍖 съел мясо');
+                showMessage('😋 Вкусно... но мало!', meatLeft, meatTop - 30);
+                updateStats();
+                
+                setTimeout(() => character.classList.remove('eating'), 400);
+            }, 300);
+        }
+
+        // ===== РЕЖИМ ОХОТЫ =====
+        function toggleHuntMode() {
+            state.huntMode = !state.huntMode;
+            
+            if (state.huntMode) {
+                gameArea.classList.add('hunt-mode');
+                huntBtn.textContent = '🔴 Охота (Вкл)';
+                huntBtn.style.borderColor = '#ff4444';
+                huntBtn.style.background = '#3a1020';
+                addMemory('🔫 режим охоты активирован');
+                showMessage('😈 Время охоты!', charX, charY - 40);
+                
+                state.huntInterval = setInterval(spawnPrey, 3000);
+                spawnPrey();
+                startChasingCursor();
+            } else {
+                gameArea.classList.remove('hunt-mode');
+                huntBtn.textContent = '🎯 Режим охоты';
+                huntBtn.style.borderColor = '#ff6b6b';
+                huntBtn.style.background = '#3a1020';
+                stopChasingCursor();
+                addMemory('💤 охота завершена');
+                
+                clearInterval(state.huntInterval);
+                state.preyList.forEach(p => p.remove());
+                state.preyList = [];
+                state.meatPieces.forEach(m => m.remove());
+                state.meatPieces = [];
+            }
+            
+            updateStats();
+        }
+
+        // ===== ВЗАИМОДЕЙСТВИЯ =====
+        function petLion() {
+            if (state.mood < 20) {
+                showMessage('😾 Не трогай меня! *убегает*', charX, charY - 40);
+                targetX = charX + (Math.random() - 0.5) * 200;
+                targetY = charY + (Math.random() - 0.5) * 150;
+                state.mood = Math.max(0, state.mood - 10);
+                addMemory('😡 не любит ласку');
+            } else {
+                showMessage('🙄 Ладно... но только раз', charX, charY - 40);
+                state.mood = Math.min(100, state.mood + 5);
+                state.energy = Math.max(0, state.energy - 5);
+                addMemory('✋ погладили (терпел)');
+            }
+            updateStats();
+        }
+
+        function feedLion() {
+            const meat = document.createElement('div');
+            meat.className = 'meat-piece';
+            meat.textContent = meatEmoji;
+            meat.style.left = (charX + 30) + 'px';
+            meat.style.top = (charY + 30) + 'px';
+            meat.addEventListener('click', (e) => {
+                e.stopPropagation();
+                eatMeat(meat);
+            });
+            gameArea.appendChild(meat);
+            state.meatPieces.push(meat);
+            
+            showMessage('🍖 Держи мясо', charX, charY - 40);
+            addMemory('🍖 получил мясо');
+            
+            setTimeout(() => {
+                if (meat.parentNode) eatMeat(meat);
+            }, 2000);
+        }
+
+        function playWithLion() {
+            if (state.energy < 20) {
+                showMessage('😴 Слишком устал...', charX, charY - 40);
+                addMemory('😴 отказался играть');
+                return;
+            }
+            
+            const gameRect = gameArea.getBoundingClientRect();
+            targetX = Math.random() * (gameRect.width - 80) + 20;
+            targetY = Math.random() * (gameRect.height - 120) + 40;
+            
+            state.energy = Math.max(0, state.energy - 15);
+            state.mood = Math.min(100, state.mood + 10);
+            showMessage('😼 Ладно, догоняй!', charX, charY - 40);
+            addMemory('🎾 играл (снизошёл)');
+            updateStats();
+        }
+
+        // ===== ОТСЛЕЖИВАНИЕ МЫШИ =====
+        gameArea.addEventListener('mousemove', (e) => {
+            const rect = gameArea.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+            
+            if (state.chasingCursor) {
+                cursorLaser.style.left = (mouseX - 6) + 'px';
+                cursorLaser.style.top = (mouseY - 6) + 'px';
+            }
+        });
+
+        gameArea.addEventListener('mouseleave', () => {
+            if (state.chasingCursor && !state.huntMode) {
+                stopChasingCursor();
+            }
+        });
+
+        gameArea.addEventListener('click', (e) => {
+            if (e.target === gameArea || e.target.classList.contains('grass-layer')) {
+                if (state.chasingCursor && !state.huntMode) {
+                    stopChasingCursor();
+                    showMessage('😤 Надоело...', charX, charY - 40);
+                }
+            }
+        });
+
+        // ===== ПАССИВНЫЕ ЭФФЕКТЫ =====
+        setInterval(() => {
+            state.hunger = Math.min(100, state.hunger + 0.8);
+            
+            if (!state.huntMode && !state.chasingCursor) {
+                state.energy = Math.min(100, state.energy + 0.3);
+            }
+            
+            if (state.huntMode) {
+                state.energy = Math.max(0, state.energy - 0.5);
+            }
+            
+            if (state.hunger > 70) state.mood = Math.max(0, state.mood - 0.4);
+            if (state.energy < 20) state.mood = Math.max(0, state.mood - 0.3);
+            
+            if (state.hunger > 85 && !state.chasingCursor && state.energy > 25) {
+                startChasingCursor();
+            }
+            
+            if (state.energy < 5 && state.chasingCursor) {
+                stopChasingCursor();
+                showMessage('😩 Выдохся...', charX, charY - 40);
+            }
+            
+            updateStats();
+        }, 2000);
+
+        // Случайная добыча вне охоты (редко)
+        setInterval(() => {
+            if (!state.huntMode && Math.random() < 0.2 && state.preyList.length < 2) {
+                const prey = document.createElement('div');
+                prey.className = 'prey-emoji';
+                prey.textContent = preyEmojis[Math.floor(Math.random() * preyEmojis.length)];
+                const gameRect = gameArea.getBoundingClientRect();
+                prey.style.left = (Math.random() * (gameRect.width - 80) + 20) + 'px';
+                prey.style.top = (Math.random() * (gameRect.height - 120) + 40) + 'px';
+                prey.style.animationDuration = (8 + Math.random() * 6) + 's';
+                
+                prey.addEventListener('click', (e) => {
+                    if (!state.huntMode) {
+                        showMessage('😾 Не в настроении охотиться...', charX, charY - 40);
+                    }
+                });
+                
+                gameArea.appendChild(prey);
+                state.preyList.push(prey);
+                
+                setTimeout(() => {
+                    if (prey.parentNode && !prey.classList.contains('caught')) {
+                        prey.remove();
+                        state.preyList = state.preyList.filter(p => p !== prey);
+                    }
+                }, 12000);
+            }
+        }, 8000);
+
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        function init() {
+            character.style.left = charX + 'px';
+            character.style.top = charY + 'px';
+            moveCharacter();
+            addMemory('👑 появился (надменный)');
+            updateStats();
+            
+            setTimeout(() => {
+                showMessage('😼 Что смотришь?', charX, charY - 40);
+            }, 1500);
+        }
+
+        // Сохранение при закрытии
+        window.addEventListener('beforeunload', () => {
+            sessionStorage.setItem('fff_memory', JSON.stringify(state.memory));
+            sessionStorage.setItem('fff_stats', JSON.stringify({
+                hunger: state.hunger,
+                energy: state.energy,
+                mood: state.mood,
+            }));
+        });
+
+        // Загрузка сохраненных данных
+        const savedMemory = sessionStorage.getItem('fff_memory');
+        const savedStats = sessionStorage.getItem('fff_stats');
+        if (savedMemory) {
+            state.memory = JSON.parse(savedMemory);
+            updateMemoryDisplay();
+        }
+        if (savedStats) {
+            const stats = JSON.parse(savedStats);
+            state.hunger = stats.hunger;
+            state.energy = stats.energy;
+            state.mood = stats.mood;
+        }
+
+        init();
+    </script>
+</body>
+</html>
