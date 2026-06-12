@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Надменный Лев — Саванна</title>
+    <title>FFF - Надменный Лев</title>
     <style>
         :root {
-            --bg: #0d1117;
-            --panel: #1a1a2e;
+            --bg: #1a1a2e;
+            --panel: #16213e;
             --text: #e0e0e0;
             --accent: #e94560;
             --gold: #d4a574;
@@ -20,7 +20,7 @@
         }
 
         body {
-            background: #0a0a14;
+            background: var(--bg);
             font-family: 'Segoe UI', system-ui, sans-serif;
             display: flex;
             justify-content: center;
@@ -37,333 +37,173 @@
             align-items: center;
             gap: 15px;
             position: relative;
-            width: 100vw;
-            height: 100vh;
-            padding: 10px;
         }
 
-        /* Огромная игровая зона с прокруткой */
-        .game-world {
-            width: 100%;
-            max-width: 1400px;
-            height: 70vh;
-            border-radius: 20px;
-            border: 4px solid #2a1f0a;
+        /* Игровая зона */
+        .game-area {
+            width: 700px;
+            height: 500px;
+            background: linear-gradient(180deg, 
+                #87CEEB 0%, #87CEEB 15%,
+                #4a8c2a 15%, #3a7a1a 18%,
+                #2d5a18 18%, #1a3a0a 40%, 
+                #8b6914 40%, #6b4f12 60%,
+                #4a3508 60%, #3a2505 100%);
+            border-radius: 24px;
+            border: 3px solid #3a3a5c;
             position: relative;
             overflow: hidden;
-            cursor: grab;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), inset 0 0 100px rgba(0,0,0,0.3);
-        }
-
-        .game-world:active {
-            cursor: grabbing;
-        }
-
-        /* Огромная карта внутри */
-        .map-container {
-            position: absolute;
-            width: 2400px;
-            height: 1600px;
-            background: #1a3a0a;
-            transition: transform 0.1s ease-out;
-            image-rendering: auto;
-        }
-
-        /* Слои карты */
-        .terrain-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Базовая земля */
-        .ground-savanna {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(ellipse at 20% 30%, #c4a44a 0%, #8b6914 40%, #5a4a0a 100%),
-                radial-gradient(ellipse at 70% 60%, #b8952e 0%, #7a5c10 50%, #4a3508 100%),
-                radial-gradient(ellipse at 50% 20%, #d4b44a 0%, #9b7920 60%, #5a4a0a 100%);
-            background-blend-mode: multiply;
-        }
-
-        /* Трава */
-        .grass-patch {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle, #4a8c2a 0%, #2d5a18 40%, transparent 70%);
-            opacity: 0.8;
-        }
-
-        .grass-tall {
-            position: absolute;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 8px,
-                #3a7a20 8px,
-                #3a7a20 10px
-            );
-            border-radius: 50% 50% 0 0;
-            opacity: 0.7;
+            cursor: default;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
         /* Деревья */
         .tree {
             position: absolute;
-            z-index: 5;
+            z-index: 3;
             pointer-events: none;
         }
-
         .tree-trunk {
             position: absolute;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(180deg, #6b4a2a, #4a2a10);
-            border-radius: 5px 5px 0 0;
+            width: 14px;
+            background: linear-gradient(180deg, #8B6914, #5a3a0a);
+            border-radius: 3px;
         }
-
         .tree-crown {
             position: absolute;
             border-radius: 50%;
-            background: radial-gradient(circle at 40% 30%, #4a9a2a, #1a5a0a);
-            box-shadow: inset 0 -10px 20px rgba(0,0,0,0.4), 0 10px 20px rgba(0,0,0,0.3);
+            background: radial-gradient(circle at 40% 30%, #5a9a2a, #1a5a0a);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
-        .tree-crown.acacia {
-            background: radial-gradient(ellipse at 50% 60%, #6a9a3a, #2a5a0a);
-            border-radius: 60% 60% 30% 30% / 80% 80% 20% 20%;
+        /* Трава */
+        .grass-tuft {
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+            font-size: 20px;
         }
 
         /* Река */
         .river {
             position: absolute;
-            background: linear-gradient(180deg, 
-                #4a90d9 0%, 
-                #3a70b9 20%, 
-                #2a5a9a 50%, 
-                #1a4a8a 80%, 
-                #0a3a7a 100%);
-            border-radius: 0;
-            opacity: 0.9;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.3);
-            z-index: 2;
+            z-index: 1;
+            background: linear-gradient(180deg, #5a9ad9, #3a7ab9, #2a5a9a);
+            border-radius: 0 0 20px 20px;
+            opacity: 0.8;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
         }
-
-        .river-shimmer {
+        .river-shine {
             position: absolute;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(255,255,255,0.3) 30%, 
-                rgba(255,255,255,0.5) 50%, 
-                rgba(255,255,255,0.3) 70%, 
-                transparent 100%);
-            animation: shimmer 3s ease-in-out infinite;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            animation: shineMove 4s ease-in-out infinite;
+        }
+        @keyframes shineMove {
+            0%, 100% { opacity: 0.2; transform: translateX(0); }
+            50% { opacity: 0.5; transform: translateX(15px); }
         }
 
-        @keyframes shimmer {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.7; }
-        }
-
-        /* Камни для сна */
-        .rock-sleep {
-            position: absolute;
-            z-index: 4;
-            background: linear-gradient(135deg, #8a8a7a, #5a5a4a);
-            border-radius: 40% 40% 30% 30% / 50% 50% 30% 30%;
-            box-shadow: 
-                0 10px 30px rgba(0,0,0,0.5),
-                inset 0 -5px 15px rgba(0,0,0,0.3),
-                inset 0 5px 15px rgba(255,255,255,0.1);
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .rock-sleep:hover {
-            box-shadow: 
-                0 15px 40px rgba(0,0,0,0.6),
-                inset 0 -5px 15px rgba(0,0,0,0.3),
-                inset 0 5px 15px rgba(255,255,255,0.2),
-                0 0 30px rgba(255,200,100,0.3);
-        }
-
-        .rock-sleep.sleeping {
-            box-shadow: 
-                0 15px 40px rgba(0,0,0,0.6),
-                0 0 50px rgba(255,200,100,0.5),
-                inset 0 -5px 15px rgba(0,0,0,0.3);
-            animation: rockGlow 1s ease-in-out infinite;
-        }
-
-        @keyframes rockGlow {
-            0%, 100% { box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 40px rgba(255,200,100,0.3); }
-            50% { box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 70px rgba(255,200,100,0.6); }
-        }
-
-        /* Камни обычные */
+        /* Камни */
         .rock {
             position: absolute;
-            z-index: 3;
-            background: linear-gradient(135deg, #7a7a6a, #5a5a3a);
-            border-radius: 30% 40% 35% 45%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4), inset 0 -3px 10px rgba(0,0,0,0.3);
+            z-index: 2;
+            background: linear-gradient(135deg, #9a9a8a, #6a6a5a);
+            border-radius: 40% 35% 30% 45%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: all 0.3s;
         }
-
-        /* Цветы */
-        .flower {
-            position: absolute;
-            z-index: 3;
-            font-size: 16px;
-            pointer-events: none;
-            animation: sway 2s ease-in-out infinite;
+        .rock:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6), 0 0 20px rgba(255,200,100,0.3);
         }
-
-        @keyframes sway {
-            0%, 100% { transform: rotate(-5deg); }
-            50% { transform: rotate(5deg); }
+        .rock.sleep-spot {
+            background: linear-gradient(135deg, #aaa89a, #7a7a6a);
+            cursor: pointer;
         }
-
-        /* Кусты */
-        .bush {
-            position: absolute;
-            z-index: 3;
-            background: radial-gradient(circle, #3a7a20, #1a4a0a);
-            border-radius: 50% 60% 40% 50%;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        /* Тропа */
-        .path {
-            position: absolute;
-            background: rgba(139, 105, 20, 0.4);
-            border-radius: 10px;
-            z-index: 1;
+        .rock.sleep-spot:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6), 0 0 30px rgba(255,220,150,0.5);
         }
 
         /* Персонаж */
         .character {
             position: absolute;
-            z-index: 20;
+            z-index: 10;
             pointer-events: none;
             transition: all 0.15s ease-out;
             transform-origin: center bottom;
-            width: 90px;
-            height: 90px;
+            width: 80px;
+            height: 80px;
         }
-
         .character img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            filter: drop-shadow(4px 6px 4px rgba(0,0,0,0.5));
-            image-rendering: auto;
+            filter: drop-shadow(3px 5px 3px rgba(0,0,0,0.4));
         }
-
-        /* Эмоции персонажа */
-        .emotion-indicator {
+        .character .emotion-badge {
             position: absolute;
-            top: -40px;
+            top: -25px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 24px;
+            font-size: 22px;
             pointer-events: none;
             animation: emotionFloat 1.5s ease-in-out infinite;
-            z-index: 21;
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
         }
-
         @keyframes emotionFloat {
             0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-8px); }
+            50% { transform: translateX(-50%) translateY(-6px); }
         }
-
-        .character.chasing {
-            animation: chaseWiggle 0.3s infinite;
-        }
-
-        .character.eating {
-            animation: nomNom 0.4s ease-in-out;
-        }
-
-        .character.angry img {
-            animation: angryShake 0.5s infinite;
-            filter: drop-shadow(4px 6px 4px rgba(255,0,0,0.7)) brightness(1.2) !important;
-        }
-
-        .character.hunting {
-            animation: huntPounce 0.6s ease-out;
-        }
-
-        .character.sleeping {
-            animation: sleepBreathe 2s ease-in-out infinite;
-            filter: brightness(0.8) saturate(0.7);
-        }
-
-        .character.avoiding {
-            animation: avoidShake 0.4s infinite;
-        }
-
-        .character.curious {
-            animation: curiousTilt 1s ease-in-out infinite;
-        }
-
-        .character.annoyed {
-            animation: annoyedFlick 0.2s infinite;
-        }
-
-        .character.flip img {
-            transform: scaleX(-1);
-        }
+        .character.chasing { animation: chaseWiggle 0.3s infinite; }
+        .character.eating { animation: nomNom 0.4s ease-in-out; }
+        .character.angry img { animation: angryShake 0.5s infinite; filter: drop-shadow(3px 5px 3px rgba(255,0,0,0.6)) brightness(1.2) !important; }
+        .character.hunting { animation: huntPounce 0.6s ease-out; }
+        .character.sleeping { animation: sleepBreathe 2s ease-in-out infinite; filter: brightness(0.8); }
+        .character.avoiding { animation: avoidDodge 0.4s infinite; }
+        .character.curious { animation: curiousTilt 1s ease-in-out infinite; }
+        .character.annoyed { animation: annoyedFlick 0.25s infinite; }
+        .character.flip img { transform: scaleX(-1); }
 
         @keyframes chaseWiggle {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-8px); }
         }
-
         @keyframes nomNom {
             0% { transform: scale(1); }
-            30% { transform: scale(1.3); }
-            60% { transform: scale(0.85); }
+            30% { transform: scale(1.25); }
+            60% { transform: scale(0.9); }
             100% { transform: scale(1); }
         }
-
         @keyframes angryShake {
             0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px) rotate(-5deg); }
-            75% { transform: translateX(10px) rotate(5deg); }
+            25% { transform: translateX(-8px) rotate(-4deg); }
+            75% { transform: translateX(8px) rotate(4deg); }
         }
-
         @keyframes huntPounce {
             0% { transform: scale(1); }
-            40% { transform: scale(0.65, 1.25); }
-            70% { transform: scale(1.35, 0.75) translateY(-40px); }
+            40% { transform: scale(0.7, 1.2); }
+            70% { transform: scale(1.3, 0.8) translateY(-30px); }
             100% { transform: scale(1) translateY(0); }
         }
-
         @keyframes sleepBreathe {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50% { transform: scale(1.04); }
         }
-
-        @keyframes avoidShake {
+        @keyframes avoidDodge {
             0%, 100% { transform: translateX(0); }
             50% { transform: translateX(15px); }
         }
-
         @keyframes curiousTilt {
             0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-8deg); }
-            75% { transform: rotate(8deg); }
+            25% { transform: rotate(-7deg); }
+            75% { transform: rotate(7deg); }
         }
-
         @keyframes annoyedFlick {
             0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(-5px) rotate(-3deg); }
+            50% { transform: translateX(-4px) rotate(-2deg); }
         }
 
         /* Добыча */
@@ -371,69 +211,59 @@
             position: absolute;
             font-size: 30px;
             pointer-events: auto;
-            z-index: 10;
+            z-index: 5;
             cursor: pointer;
-            transition: all 0.3s;
+            animation: preyMove 6s ease-in-out infinite;
             filter: drop-shadow(0 3px 3px rgba(0,0,0,0.4));
+            transition: transform 0.2s;
         }
-
-        .prey-emoji:hover {
-            transform: scale(1.4);
-            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.6)) brightness(1.3);
-        }
-
-        .prey-emoji.fleeing {
-            animation: flee 1.5s ease-out forwards;
-            pointer-events: none;
-        }
-
+        .prey-emoji:hover { transform: scale(1.3); }
         .prey-emoji.caught {
             animation: caughtFade 0.5s forwards;
             pointer-events: none;
         }
-
-        @keyframes flee {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--flee-x), var(--flee-y)) scale(0.3); opacity: 0; }
+        @keyframes preyMove {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(60px, -30px); }
+            50% { transform: translate(30px, -15px); }
+            75% { transform: translate(-40px, -35px); }
+            100% { transform: translate(0, 0); }
         }
-
         @keyframes caughtFade {
             0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.3); }
-            100% { opacity: 0; transform: scale(0) translateY(-50px); }
+            100% { opacity: 0; transform: scale(0) translateY(-40px); }
         }
 
         /* Мясо */
         .meat-piece {
             position: absolute;
             font-size: 28px;
-            z-index: 9;
+            z-index: 6;
             pointer-events: auto;
             cursor: pointer;
             animation: meatDrop 0.5s ease-out;
-            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 3px 3px rgba(0,0,0,0.5));
+            transition: transform 0.2s;
         }
-
         .meat-piece:hover {
-            transform: scale(1.4);
-            filter: drop-shadow(0 6px 6px rgba(0,0,0,0.7)) brightness(1.3);
+            transform: scale(1.35);
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.7)) brightness(1.3);
         }
-
         @keyframes meatDrop {
-            0% { transform: translateY(-60px); opacity: 0; }
+            0% { transform: translateY(-50px); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
         }
 
-        /* Лазер курсора */
+        /* Курсор-лазер */
         .cursor-laser {
             position: absolute;
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             background: var(--accent);
             border-radius: 50%;
             pointer-events: none;
             z-index: 100;
-            box-shadow: 0 0 25px var(--accent), 0 0 50px var(--accent);
+            box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent);
             display: none;
         }
 
@@ -441,23 +271,20 @@
         .stats-panel {
             background: var(--panel);
             border-radius: 16px;
-            padding: 15px 25px;
-            border: 2px solid #2a1f0a;
-            width: 100%;
-            max-width: 1000px;
+            padding: 18px 25px;
+            border: 2px solid #3a3a5c;
+            width: 700px;
             display: flex;
-            gap: 20px;
+            gap: 18px;
             align-items: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
-
         .stat {
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
         }
-
         .stat-label {
             color: #aaa;
             font-size: 11px;
@@ -467,7 +294,6 @@
             align-items: center;
             gap: 5px;
         }
-
         .stat-bar {
             height: 10px;
             background: #2a2a4a;
@@ -475,17 +301,14 @@
             overflow: hidden;
             border: 1px solid #3a3a5c;
         }
-
         .stat-fill {
             height: 100%;
             border-radius: 8px;
             transition: width 0.5s ease;
         }
-
         .stat-fill.hunger { background: linear-gradient(90deg, #e94560, #ff6b6b); }
         .stat-fill.energy { background: linear-gradient(90deg, #4ecdc4, #44bd9e); }
         .stat-fill.mood { background: linear-gradient(90deg, #ffd93d, #ff9f43); }
-
         .stat-value {
             color: var(--text);
             font-size: 13px;
@@ -499,9 +322,8 @@
             flex-wrap: wrap;
             justify-content: center;
         }
-
         .btn {
-            background: #1a1a2e;
+            background: var(--panel);
             color: var(--text);
             border: 2px solid #3a3a5c;
             padding: 10px 18px;
@@ -514,38 +336,32 @@
             gap: 6px;
             font-family: inherit;
         }
-
         .btn:hover {
             background: #2a2a5a;
             border-color: #5a5a8c;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
-
-        .btn:active {
-            transform: translateY(0);
-            box-shadow: none;
-        }
-
-        .btn.hunt-mode { border-color: #ff6b6b; background: #2a1018; }
-        .btn.hunt-mode.active { border-color: #ff4444; background: #3a1020; box-shadow: 0 0 20px rgba(255,0,0,0.3); }
+        .btn:active { transform: translateY(0); box-shadow: none; }
+        .btn.hunt-btn { border-color: #ff6b6b; background: #3a1020; }
+        .btn.hunt-btn.active { border-color: #ff4444; background: #4a1525; box-shadow: 0 0 20px rgba(255,0,0,0.3); }
+        .btn.sleep-btn { border-color: #ffd93d; }
 
         /* Сообщения */
         .message-bubble {
             position: absolute;
             background: white;
             color: #1a1a2e;
-            padding: 8px 16px;
+            padding: 8px 15px;
             border-radius: 18px;
             font-size: 13px;
             font-weight: bold;
-            z-index: 30;
+            z-index: 20;
             pointer-events: none;
-            animation: bubbleFloat 2.5s ease-out forwards;
+            animation: bubbleFloat 2.2s ease-out forwards;
             white-space: nowrap;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
-
         .message-bubble::after {
             content: '';
             position: absolute;
@@ -558,63 +374,39 @@
             border-right: 7px solid transparent;
             border-top: 7px solid white;
         }
-
         @keyframes bubbleFloat {
             0% { opacity: 0; transform: translateY(10px); }
-            15% { opacity: 1; transform: translateY(-25px); }
-            75% { opacity: 1; transform: translateY(-45px); }
-            100% { opacity: 0; transform: translateY(-75px); }
+            15% { opacity: 1; transform: translateY(-20px); }
+            75% { opacity: 1; transform: translateY(-40px); }
+            100% { opacity: 0; transform: translateY(-70px); }
         }
 
-        /* Лог памяти */
-        .memory-bar {
+        /* Память */
+        .memory-log {
             background: var(--panel);
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 10px 18px;
-            border: 1px solid #2a1f0a;
-            width: 100%;
-            max-width: 1000px;
+            border: 1px solid #3a3a5c;
+            width: 700px;
+            max-height: 80px;
+            overflow-y: auto;
+            font-size: 11px;
+            color: #888;
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            align-items: center;
-            font-size: 11px;
-            max-height: 60px;
-            overflow-y: auto;
         }
-
         .memory-tag {
             background: #2a2a4a;
             padding: 3px 8px;
             border-radius: 8px;
             font-size: 10px;
             color: #aaa;
-            white-space: nowrap;
         }
-
-        .memory-tag.important {
+        .memory-tag.warn {
             background: #3a1a2a;
             color: #ff6b6b;
             border: 1px solid #5a2a3a;
-        }
-
-        /* Подсказка */
-        .tooltip {
-            position: absolute;
-            background: rgba(0,0,0,0.85);
-            color: #ffd93d;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            pointer-events: none;
-            z-index: 25;
-            white-space: nowrap;
-            animation: fadeIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
 
         .title {
@@ -624,66 +416,34 @@
             letter-spacing: 2px;
             text-shadow: 0 0 20px rgba(212, 167, 116, 0.5);
         }
-
         .fallback-emoji {
-            font-size: 70px;
+            font-size: 60px;
             display: none;
-        }
-
-        /* Мини-карта */
-        .minimap {
             position: absolute;
-            bottom: 15px;
-            right: 15px;
-            width: 140px;
-            height: 100px;
-            background: rgba(0,0,0,0.7);
-            border: 2px solid #5a4a0a;
-            border-radius: 8px;
-            z-index: 50;
-            pointer-events: none;
-            overflow: hidden;
+            top: 10px;
+            left: 10px;
         }
 
-        .minimap-view {
-            position: absolute;
-            border: 1px solid #ffd93d;
-            background: rgba(255,215,55,0.1);
-        }
-
-        @media (max-width: 768px) {
-            .game-world {
-                height: 50vh;
-            }
-            .btn {
-                padding: 8px 12px;
-                font-size: 11px;
-            }
-            .stats-panel {
-                padding: 10px 15px;
-                gap: 10px;
-            }
+        @media (max-width: 750px) {
+            .game-area, .stats-panel, .memory-log { width: 95vw; }
+            .btn { padding: 8px 12px; font-size: 11px; }
+            .character { width: 60px; height: 60px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="title">🦁 Саванна — Надменный Лев</div>
+        <div class="title">🦁 Надменный Лев — Саванна</div>
 
-        <!-- Игровой мир -->
-        <div class="game-world" id="gameWorld">
-            <div class="map-container" id="mapContainer">
-                <!-- Карта генерируется через JS -->
-            </div>
+        <!-- Игровая зона -->
+        <div class="game-area" id="gameArea">
+            <!-- Декорации генерируются JS -->
             <div class="character" id="character">
                 <img src="FFF.png" alt="Лев" id="charImage" onerror="handleImageError()">
                 <span class="fallback-emoji" id="fallbackEmoji">🦁</span>
-                <div class="emotion-indicator" id="emotionIndicator"></div>
+                <div class="emotion-badge" id="emotionBadge"></div>
             </div>
             <div class="cursor-laser" id="cursorLaser"></div>
-            <div class="minimap" id="minimap">
-                <div class="minimap-view" id="minimapView"></div>
-            </div>
         </div>
 
         <!-- Статус -->
@@ -710,13 +470,13 @@
             <button class="btn" onclick="petLion()">✋ Погладить</button>
             <button class="btn" onclick="feedLion()">🍖 Покормить</button>
             <button class="btn" onclick="playWithLion()">🎾 Поиграть</button>
-            <button class="btn hunt-mode" id="huntBtn" onclick="toggleHuntMode()">🎯 Охота</button>
-            <button class="btn" onclick="goToSleepSpot()">💤 Спать на камнях</button>
+            <button class="btn hunt-btn" id="huntBtn" onclick="toggleHuntMode()">🎯 Охота</button>
+            <button class="btn sleep-btn" onclick="goToSleepSpot()">💤 Спать</button>
         </div>
 
         <!-- Память -->
-        <div class="memory-bar" id="memoryBar">
-            <span style="color:#666;">Память:</span>
+        <div class="memory-log" id="memoryLog">
+            <span style="color:#666;">Память FFF:</span>
         </div>
     </div>
 
@@ -725,99 +485,589 @@
         function handleImageError() {
             document.getElementById('charImage').style.display = 'none';
             document.getElementById('fallbackEmoji').style.display = 'block';
+            console.warn('FFF.png не найден. Использую эмодзи.');
         }
 
-        // ===== КАРТА МИРА =====
-        const mapContainer = document.getElementById('mapContainer');
-        const mapWidth = 2400;
-        const mapHeight = 1600;
-
-        function generateMap() {
-            let html = '<div class="terrain-layer"><div class="ground-savanna"></div>';
-
-            // Трава (много пятен)
-            const grassPositions = [
-                {x: 100, y: 200, s: 180}, {x: 350, y: 350, s: 150}, {x: 600, y: 250, s: 200},
-                {x: 900, y: 400, s: 170}, {x: 1200, y: 300, s: 220}, {x: 1500, y: 500, s: 160},
-                {x: 1800, y: 350, s: 190}, {x: 2100, y: 450, s: 180}, {x: 200, y: 800, s: 200},
-                {x: 500, y: 700, s: 175}, {x: 800, y: 900, s: 210}, {x: 1100, y: 750, s: 185},
-                {x: 1400, y: 850, s: 195}, {x: 1700, y: 700, s: 170}, {x: 2000, y: 950, s: 200},
-                {x: 100, y: 1100, s: 190}, {x: 400, y: 1200, s: 180}, {x: 700, y: 1150, s: 210},
-                {x: 1000, y: 1300, s: 175}, {x: 1300, y: 1200, s: 195}, {x: 1600, y: 1100, s: 185},
-                {x: 1900, y: 1300, s: 200}, {x: 2200, y: 1150, s: 190},
-            ];
-            grassPositions.forEach(g => {
-                html += `<div class="grass-patch" style="left:${g.x}px;top:${g.y}px;width:${g.s}px;height:${g.s*0.7}px;"></div>`;
-            });
-
-            // Высокая трава
-            for (let i = 0; i < 40; i++) {
-                const tx = Math.random() * mapWidth;
-                const ty = Math.random() * mapHeight;
-                const tw = 60 + Math.random() * 120;
-                html += `<div class="grass-tall" style="left:${tx}px;top:${ty}px;width:${tw}px;height:${tw*0.8}px;"></div>`;
-            }
-
+        // ===== ГЕНЕРАЦИЯ КАРТЫ =====
+        function buildMap() {
+            const area = document.getElementById('gameArea');
+            
             // Деревья
-            const treePositions = [
-                {x: 150, y: 150, h: 160}, {x: 450, y: 100, h: 180}, {x: 750, y: 180, h: 150},
-                {x: 1050, y: 120, h: 200}, {x: 1350, y: 160, h: 170}, {x: 1650, y: 100, h: 190},
-                {x: 1950, y: 150, h: 160}, {x: 2250, y: 130, h: 180},
-                {x: 100, y: 700, h: 170}, {x: 350, y: 600, h: 190}, {x: 650, y: 750, h: 160},
-                {x: 950, y: 650, h: 200}, {x: 1250, y: 700, h: 175}, {x: 1550, y: 620, h: 185},
-                {x: 1850, y: 750, h: 165}, {x: 2150, y: 680, h: 195},
-                {x: 200, y: 1050, h: 180}, {x: 550, y: 1150, h: 170}, {x: 850, y: 1080, h: 190},
-                {x: 1150, y: 1200, h: 160}, {x: 1450, y: 1100, h: 200}, {x: 1750, y: 1180, h: 175},
-                {x: 2050, y: 1050, h: 185},
+            const trees = [
+                {x: 40, y: 60, h: 140}, {x: 150, y: 30, h: 120}, {x: 580, y: 50, h: 150},
+                {x: 500, y: 80, h: 110}, {x: 300, y: 20, h: 130}, {x: 650, y: 40, h: 125},
             ];
-            treePositions.forEach((t, i) => {
-                const type = i % 3 === 0 ? 'acacia' : '';
-                html += `
-                    <div class="tree" style="left:${t.x}px;top:${t.y}px;width:${t.h*0.8}px;height:${t.h}px;">
-                        <div class="tree-trunk" style="width:16px;height:${t.h*0.4}px;bottom:0;left:50%;transform:translateX(-50%);"></div>
-                        <div class="tree-crown ${type}" style="width:${t.h*0.7}px;height:${t.h*0.6}px;top:0;left:50%;transform:translateX(-50%);"></div>
-                    </div>
+            trees.forEach(t => {
+                const tree = document.createElement('div');
+                tree.className = 'tree';
+                tree.style.cssText = `left:${t.x}px;top:${t.y}px;width:${t.h*0.7}px;height:${t.h}px;`;
+                tree.innerHTML = `
+                    <div class="tree-trunk" style="height:${t.h*0.4}px;"></div>
+                    <div class="tree-crown" style="width:${t.h*0.6}px;height:${t.h*0.55}px;top:0;left:50%;transform:translateX(-50%);"></div>
                 `;
+                area.appendChild(tree);
             });
 
-            // Кусты
-            for (let i = 0; i < 50; i++) {
-                const bx = Math.random() * mapWidth;
-                const by = Math.random() * mapHeight;
-                const bs = 30 + Math.random() * 50;
-                html += `<div class="bush" style="left:${bx}px;top:${by}px;width:${bs}px;height:${bs*0.7}px;"></div>`;
-            }
-
-            // Река (извилистая)
-            html += `
-                <div class="river" style="left:400px;top:0;width:120px;height:900px;border-radius:0 0 60px 60px;"></div>
-                <div class="river" style="left:480px;top:850px;width:350px;height:80px;border-radius:0 40px 40px 0;transform:rotate(-5deg);"></div>
-                <div class="river" style="left:780px;top:780px;width:100px;height:600px;border-radius:0 0 50px 50px;"></div>
-                <div class="river" style="left:820px;top:1300px;width:500px;height:70px;border-radius:0 35px 35px 0;transform:rotate(3deg);"></div>
-                <div class="river-shimmer" style="left:410px;top:100px;width:100px;height:750px;"></div>
-                <div class="river-shimmer" style="left:790px;top:800px;width:80px;height:500px;"></div>
-            `;
-
-            // Камни для сна
-            html += `
-                <div class="rock-sleep" id="sleepRock1" style="left:1100px;top:400px;width:160px;height:100px;" 
-                     onmouseenter="showTooltip(event, 'Место для сна 💤')" onmouseleave="hideTooltip()"
-                     onclick="sleepOnRock('sleepRock1')"></div>
-                <div class="rock-sleep" id="sleepRock2" style="left:1800px;top:200px;width:140px;height:90px;"
-                     onmouseenter="showTooltip(event, 'Место для сна 💤')" onmouseleave="hideTooltip()"
-                     onclick="sleepOnRock('sleepRock2')"></div>
-                <div class="rock-sleep" id="sleepRock3" style="left:600px;top:1000px;width:150px;height:95px;"
-                     onmouseenter="showTooltip(event, 'Место для сна 💤')" onmouseleave="hideTooltip()"
-                     onclick="sleepOnRock('sleepRock3')"></div>
-            `;
-
-            // Обычные камни
+            // Трава
+            const grassTufts = ['🌿', '🌱', '🪨', '🌾'];
             for (let i = 0; i < 25; i++) {
-                const rx = Math.random() * mapWidth;
-                const ry = Math.random() * mapHeight;
-                const rs = 20 + Math.random() * 40;
-                html += `<div class="rock" style="left:${rx}px;top:${ry}px;width:${rs}px;height:${rs*0.6}px;"></div>`;
+                const g = document.createElement('div');
+                g.className = 'grass-tuft';
+                g.textContent = grassTufts[Math.floor(Math.random() * grassTufts.length)];
+                g.style.left = (Math.random() * 650) + 'px';
+                g.style.top = (Math.random() * 420 + 30) + 'px';
+                g.style.opacity = 0.6 + Math.random() * 0.4;
+                area.appendChild(g);
             }
 
-            // Цветы
-            const flowerEmojis = ['🌸', '🌼', '🌻', '
+            // Река
+            const river = document.createElement('div');
+            river.className = 'river';
+            river.style.cssText = 'left:300px;top:250px;width:80px;height:250px;';
+            area.appendChild(river);
+            
+            const shine1 = document.createElement('div');
+            shine1.className = 'river-shine';
+            shine1.style.cssText = 'left:310px;top:280px;width:40px;height:8px;';
+            area.appendChild(shine1);
+            
+            const shine2 = document.createElement('div');
+            shine2.className = 'river-shine';
+            shine2.style.cssText = 'left:315px;top:380px;width:35px;height:8px;animation-delay:2s;';
+            area.appendChild(shine2);
+
+            // Камни (включая спальные)
+            const rocks = [
+                {x: 120, y: 350, w: 70, h: 45, sleep: true},
+                {x: 550, y: 300, w: 80, h: 50, sleep: true},
+                {x: 400, y: 420, w: 60, h: 38, sleep: false},
+                {x: 200, y: 400, w: 45, h: 30, sleep: false},
+                {x: 620, y: 380, w: 55, h: 35, sleep: false},
+            ];
+            rocks.forEach((r, i) => {
+                const rock = document.createElement('div');
+                rock.className = 'rock' + (r.sleep ? ' sleep-spot' : '');
+                rock.style.cssText = `left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px;`;
+                if (r.sleep) {
+                    rock.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        sleepOnRock(i);
+                    });
+                }
+                area.appendChild(rock);
+            });
+        }
+
+        // ===== СОСТОЯНИЕ ПЕРСОНАЖА =====
+        const state = {
+            hunger: 70,
+            energy: 80,
+            mood: 40,
+            huntMode: false,
+            chasingCursor: false,
+            isSleeping: false,
+            emotion: '😼',
+            memory: [],
+            preyList: [],
+            meatPieces: [],
+        };
+
+        // ===== DOM ЭЛЕМЕНТЫ =====
+        const gameArea = document.getElementById('gameArea');
+        const character = document.getElementById('character');
+        const emotionBadge = document.getElementById('emotionBadge');
+        const cursorLaser = document.getElementById('cursorLaser');
+        const huntBtn = document.getElementById('huntBtn');
+        const memoryLog = document.getElementById('memoryLog');
+
+        let charX = 300, charY = 250;
+        let targetX = 300, targetY = 250;
+        let mouseX = 350, mouseY = 250;
+        let animationFrame;
+        let sleepTimeout;
+
+        // ===== ЭМОЦИИ =====
+        function setEmotion(emoji) {
+            state.emotion = emoji;
+            emotionBadge.textContent = emoji;
+        }
+
+        function updateEmotionByMood() {
+            character.classList.remove('angry', 'avoiding', 'curious', 'annoyed', 'sleeping');
+            
+            if (state.isSleeping) {
+                character.classList.add('sleeping');
+                setEmotion('💤');
+                return;
+            }
+            
+            if (state.mood >= 80) {
+                setEmotion('😸');
+                character.classList.add('curious');
+            } else if (state.mood >= 60) {
+                setEmotion('😼');
+            } else if (state.mood >= 40) {
+                setEmotion('😾');
+                if (state.mood <= 50) character.classList.add('avoiding');
+            } else if (state.mood >= 20) {
+                setEmotion('😡');
+                character.classList.add('annoyed');
+                character.classList.add('avoiding');
+            } else {
+                setEmotion('🤬');
+                character.classList.add('angry');
+                character.classList.add('avoiding');
+            }
+            
+            if (state.hunger > 80 && state.mood < 50) {
+                setEmotion('😤');
+                character.classList.add('angry');
+            }
+            if (state.energy < 20) {
+                setEmotion('😩');
+            }
+        }
+
+        // ===== СТАТУСЫ =====
+        function updateStats() {
+            state.hunger = Math.max(0, Math.min(100, state.hunger));
+            state.energy = Math.max(0, Math.min(100, state.energy));
+            state.mood = Math.max(0, Math.min(100, state.mood));
+
+            document.getElementById('hungerBar').style.width = state.hunger + '%';
+            document.getElementById('energyBar').style.width = state.energy + '%';
+            document.getElementById('moodBar').style.width = state.mood + '%';
+            document.getElementById('hungerValue').textContent = Math.round(state.hunger) + '%';
+            document.getElementById('energyValue').textContent = Math.round(state.energy) + '%';
+            document.getElementById('moodValue').textContent = Math.round(state.mood) + '%';
+
+            updateEmotionByMood();
+
+            // Поведение при настроении ≤ 50 — избегание курсора
+            if (state.mood <= 50 && !state.isSleeping && !state.huntMode) {
+                const dx = mouseX - charX;
+                const dy = mouseY - charY;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < 100 && !state.chasingCursor) {
+                    targetX = charX - (dx/dist) * 120;
+                    targetY = charY - (dy/dist) * 120;
+                    if (!state.memory.includes('избегает')) {
+                        addMemory('😒 избегает внимания', true);
+                        showMessage('Уйди...', charX, charY - 30);
+                    }
+                }
+            }
+
+            // Голодный и злой — гоняется за курсором
+            if (state.hunger > 80 && state.mood < 30 && state.energy > 25 && !state.isSleeping && !state.huntMode) {
+                startChasingCursor();
+            }
+        }
+
+        // ===== ПАМЯТЬ =====
+        function addMemory(action, isWarn = false) {
+            const time = new Date().toLocaleTimeString();
+            const entry = `${time}: ${action}`;
+            if (state.memory.length > 0 && state.memory[state.memory.length-1].includes(action)) return;
+            state.memory.push(entry);
+            if (state.memory.length > 20) state.memory.shift();
+            
+            memoryLog.innerHTML = '<span style="color:#666;">Память:</span> ' + 
+                state.memory.slice(-8).map(m => 
+                    `<span class="memory-tag${isWarn ? ' warn' : ''}">${m}</span>`
+                ).join('');
+        }
+
+        // ===== СООБЩЕНИЯ =====
+        function showMessage(text, x, y) {
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = text;
+            bubble.style.left = Math.max(10, Math.min(600, x)) + 'px';
+            bubble.style.top = Math.max(20, y) + 'px';
+            gameArea.appendChild(bubble);
+            setTimeout(() => bubble.remove(), 2200);
+        }
+
+        // ===== ДВИЖЕНИЕ =====
+        function moveCharacter() {
+            const maxX = 620, maxY = 420, minX = 10, minY = 40;
+
+            if (state.chasingCursor && !state.isSleeping) {
+                targetX = mouseX - 40;
+                targetY = mouseY - 45;
+            }
+
+            targetX = Math.max(minX, Math.min(maxX, targetX));
+            targetY = Math.max(minY, Math.min(maxY, targetY));
+
+            const speed = state.isSleeping ? 0 : (state.chasingCursor ? 0.1 : 0.05);
+            charX += (targetX - charX) * speed;
+            charY += (targetY - charY) * speed;
+
+            const dx = targetX - charX;
+            if (Math.abs(dx) > 2) {
+                if (dx > 0) character.classList.remove('flip');
+                else character.classList.add('flip');
+            }
+
+            character.style.left = charX + 'px';
+            character.style.top = charY + 'px';
+
+            cursorLaser.style.display = state.chasingCursor ? 'block' : 'none';
+            if (state.chasingCursor) {
+                cursorLaser.style.left = (mouseX - 6) + 'px';
+                cursorLaser.style.top = (mouseY - 6) + 'px';
+            }
+
+            animationFrame = requestAnimationFrame(moveCharacter);
+        }
+
+        // ===== ПОГОНЯ =====
+        function startChasingCursor() {
+            if (state.chasingCursor || state.isSleeping) return;
+            state.chasingCursor = true;
+            character.classList.add('chasing');
+            addMemory('🏃 гонится!', true);
+            showMessage('ХВАТИТ!', charX, charY - 30);
+        }
+
+        function stopChasingCursor() {
+            state.chasingCursor = false;
+            character.classList.remove('chasing');
+            cursorLaser.style.display = 'none';
+        }
+
+        // ===== СОН =====
+        function goToSleepSpot() {
+            if (state.isSleeping) {
+                wakeUp();
+                return;
+            }
+            if (state.energy > 80) {
+                showMessage('Не хочу спать!', charX, charY - 30);
+                return;
+            }
+            
+            // Идём к спальному камню
+            targetX = 120;
+            targetY = 340;
+            state.isSleeping = true;
+            character.classList.add('sleeping');
+            setEmotion('💤');
+            stopChasingCursor();
+            addMemory('💤 уснул на камнях');
+            showMessage('Zzz... наконец-то', charX, charY - 30);
+            
+            sleepTimeout = setTimeout(wakeUp, 15000);
+            document.querySelector('.btn.sleep-btn').textContent = '☀️ Проснуться';
+        }
+
+        function sleepOnRock(index) {
+            const positions = [{x: 120, y: 340}, {x: 550, y: 290}];
+            if (index < positions.length) {
+                targetX = positions[index].x;
+                targetY = positions[index].y;
+            }
+            goToSleepSpot();
+        }
+
+        function wakeUp() {
+            state.isSleeping = false;
+            character.classList.remove('sleeping');
+            state.energy = Math.min(100, state.energy + 40);
+            state.mood = Math.min(100, state.mood + 15);
+            clearTimeout(sleepTimeout);
+            addMemory('☀️ проснулся');
+            showMessage('Ну ладно, встаю...', charX, charY - 30);
+            document.querySelector('.btn.sleep-btn').textContent = '💤 Спать';
+            updateStats();
+        }
+
+        // ===== ОХОТА =====
+        const preyEmojis = ['🐔', '🐑', '🐇', '🦆', '🐟', '🐖', '🐄', '🦌'];
+
+        function spawnPrey() {
+            if (!state.huntMode || state.isSleeping) return;
+            if (state.preyList.length >= 5) return;
+
+            const prey = document.createElement('div');
+            prey.className = 'prey-emoji';
+            prey.textContent = preyEmojis[Math.floor(Math.random() * preyEmojis.length)];
+            prey.style.left = (Math.random() * 600 + 20) + 'px';
+            prey.style.top = (Math.random() * 380 + 40) + 'px';
+            prey.style.animationDuration = (5 + Math.random() * 6) + 's';
+            
+            prey.addEventListener('click', (e) => {
+                e.stopPropagation();
+                catchPrey(prey);
+            });
+            
+            gameArea.appendChild(prey);
+            state.preyList.push(prey);
+
+            setTimeout(() => {
+                if (prey.parentNode && !prey.classList.contains('caught')) {
+                    prey.remove();
+                    state.preyList = state.preyList.filter(p => p !== prey);
+                }
+            }, 12000);
+        }
+
+        function catchPrey(preyElement) {
+            if (!state.huntMode || preyElement.classList.contains('caught') || state.isSleeping) return;
+            
+            preyElement.classList.add('caught');
+            character.classList.add('hunting');
+            
+            const meat = document.createElement('div');
+            meat.className = 'meat-piece';
+            meat.textContent = '🥩';
+            meat.style.left = preyElement.style.left;
+            meat.style.top = preyElement.style.top;
+            meat.addEventListener('click', (e) => {
+                e.stopPropagation();
+                eatMeat(meat);
+            });
+            
+            gameArea.appendChild(meat);
+            state.meatPieces.push(meat);
+            
+            setTimeout(() => {
+                preyElement.remove();
+                state.preyList = state.preyList.filter(p => p !== preyElement);
+            }, 500);
+
+            const ml = parseFloat(meat.style.left);
+            const mt = parseFloat(meat.style.top);
+            targetX = ml;
+            targetY = mt;
+            
+            state.mood = Math.min(100, state.mood + 15);
+            addMemory('🎯 поймал!');
+            showMessage('Попался!', ml, mt - 25);
+            
+            setTimeout(() => character.classList.remove('hunting'), 600);
+            updateStats();
+        }
+
+        function eatMeat(meatElement) {
+            if (!meatElement.parentNode || state.isSleeping) return;
+            
+            const ml = parseFloat(meatElement.style.left);
+            const mt = parseFloat(meatElement.style.top);
+            targetX = ml;
+            targetY = mt;
+            
+            setTimeout(() => {
+                character.classList.add('eating');
+                meatElement.remove();
+                state.meatPieces = state.meatPieces.filter(m => m !== meatElement);
+                
+                state.hunger = Math.max(0, state.hunger - 25);
+                state.energy = Math.min(100, state.energy + 10);
+                state.mood = Math.min(100, state.mood + 10);
+                
+                addMemory('🍖 съел мясо');
+                showMessage('Вкусно!', ml, mt - 25);
+                updateStats();
+                
+                setTimeout(() => character.classList.remove('eating'), 400);
+            }, 300);
+        }
+
+        function toggleHuntMode() {
+            if (state.isSleeping) {
+                showMessage('Zzz... сплю', charX, charY - 30);
+                return;
+            }
+            
+            state.huntMode = !state.huntMode;
+            
+            if (state.huntMode) {
+                huntBtn.textContent = '🔴 Охота ON';
+                huntBtn.classList.add('active');
+                stopChasingCursor();
+                addMemory('🔫 охота!');
+                showMessage('Время охоты!', charX, charY - 30);
+                state.huntInterval = setInterval(spawnPrey, 2500);
+                spawnPrey();
+            } else {
+                huntBtn.textContent = '🎯 Охота';
+                huntBtn.classList.remove('active');
+                clearInterval(state.huntInterval);
+                state.preyList.forEach(p => p.remove());
+                state.preyList = [];
+                state.meatPieces.forEach(m => m.remove());
+                state.meatPieces = [];
+                addMemory('💤 охота кончилась');
+                updateStats();
+            }
+        }
+
+        // ===== ВЗАИМОДЕЙСТВИЯ =====
+        function petLion() {
+            if (state.isSleeping) {
+                showMessage('Zzz...', charX, charY - 30);
+                return;
+            }
+            if (state.mood < 30) {
+                showMessage('НЕ ТРОГАЙ! *убегает*', charX, charY - 30);
+                targetX = charX + (Math.random() - 0.5) * 180;
+                targetY = charY + (Math.random() - 0.5) * 120;
+                state.mood = Math.max(0, state.mood - 10);
+                addMemory('😡 ударил за ласку', true);
+            } else if (state.mood < 60) {
+                showMessage('Ладно... один раз', charX, charY - 30);
+                state.mood = Math.min(100, state.mood + 5);
+                state.energy = Math.max(0, state.energy - 5);
+                addMemory('🙄 потерпел ласку');
+            } else {
+                showMessage('Мрр... ещё?', charX, charY - 30);
+                state.mood = Math.min(100, state.mood + 8);
+                addMemory('😸 понравилось!');
+            }
+            updateStats();
+        }
+
+        function feedLion() {
+            if (state.isSleeping) {
+                showMessage('Zzz...', charX, charY - 30);
+                return;
+            }
+            const meat = document.createElement('div');
+            meat.className = 'meat-piece';
+            meat.textContent = '🥩';
+            meat.style.left = (charX + 25) + 'px';
+            meat.style.top = (charY + 25) + 'px';
+            meat.addEventListener('click', (e) => {
+                e.stopPropagation();
+                eatMeat(meat);
+            });
+            gameArea.appendChild(meat);
+            state.meatPieces.push(meat);
+            showMessage('Держи мясо', charX, charY - 30);
+            addMemory('🍖 получил мясо');
+            
+            setTimeout(() => {
+                if (meat.parentNode) eatMeat(meat);
+            }, 2000);
+        }
+
+        function playWithLion() {
+            if (state.isSleeping) {
+                showMessage('Zzz...', charX, charY - 30);
+                return;
+            }
+            if (state.energy < 15) {
+                showMessage('Устал...', charX, charY - 30);
+                addMemory('😴 отказался играть');
+                return;
+            }
+            targetX = Math.random() * 550 + 30;
+            targetY = Math.random() * 350 + 50;
+            state.energy = Math.max(0, state.energy - 15);
+            state.mood = Math.min(100, state.mood + (state.mood < 50 ? 5 : 12));
+            showMessage('Ладно, догоняй!', charX, charY - 30);
+            addMemory('🎾 поиграл');
+            updateStats();
+        }
+
+        // ===== ОТСЛЕЖИВАНИЕ МЫШИ =====
+        gameArea.addEventListener('mousemove', (e) => {
+            const rect = gameArea.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+
+        gameArea.addEventListener('mouseleave', () => {
+            if (state.chasingCursor && !state.huntMode) stopChasingCursor();
+        });
+
+        gameArea.addEventListener('click', (e) => {
+            if ((e.target === gameArea || e.target.classList.contains('river') || 
+                 e.target.classList.contains('river-shine') || e.target.classList.contains('grass-tuft')) && 
+                state.chasingCursor && !state.huntMode) {
+                stopChasingCursor();
+                showMessage('Надоело...', charX, charY - 30);
+            }
+        });
+
+        // ===== ПАССИВНЫЕ ЭФФЕКТЫ =====
+        setInterval(() => {
+            if (state.isSleeping) {
+                state.energy = Math.min(100, state.energy + 1.5);
+                state.hunger = Math.min(100, state.hunger + 0.15);
+                state.mood = Math.min(100, state.mood + 0.3);
+                updateStats();
+                return;
+            }
+            
+            state.hunger = Math.min(100, state.hunger + 0.6);
+            
+            if (!state.huntMode && !state.chasingCursor) {
+                state.energy = Math.min(100, state.energy + 0.25);
+            }
+            if (state.huntMode) {
+                state.energy = Math.max(0, state.energy - 0.4);
+            }
+            if (state.chasingCursor) {
+                state.energy = Math.max(0, state.energy - 0.35);
+            }
+            
+            if (state.hunger > 70) state.mood = Math.max(0, state.mood - 0.3);
+            if (state.energy < 15) state.mood = Math.max(0, state.mood - 0.4);
+            
+            if (state.hunger > 85 && !state.chasingCursor && state.energy > 20 && !state.isSleeping && state.mood < 35) {
+                startChasingCursor();
+            }
+            if (state.energy < 5 && state.chasingCursor) {
+                stopChasingCursor();
+                showMessage('Выдохся...', charX, charY - 30);
+            }
+            
+            updateStats();
+        }, 2000);
+
+        // ===== СТАРТ =====
+        function init() {
+            buildMap();
+            character.style.left = charX + 'px';
+            character.style.top = charY + 'px';
+            setEmotion('😼');
+            moveCharacter();
+            addMemory('👑 появился');
+            updateStats();
+            
+            setTimeout(() => showMessage('Что смотришь?', charX, charY - 30), 1500);
+            setTimeout(() => showMessage('Я тут главный.', charX + 20, charY - 45), 3500);
+        }
+
+        window.addEventListener('beforeunload', () => {
+            try {
+                sessionStorage.setItem('fff_data', JSON.stringify({
+                    hunger: state.hunger, energy: state.energy, mood: state.mood,
+                    memory: state.memory.slice(-10)
+                }));
+            } catch(e) {}
+        });
+
+        // Загрузка сохранения
+        try {
+            const saved = sessionStorage.getItem('fff_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                state.hunger = data.hunger || 70;
+                state.energy = data.energy || 80;
+                state.mood = data.mood || 40;
+                if (data.memory) state.memory = data.memory;
+                memoryLog.innerHTML = '<span style="color:#666;">Память:</span> ' + 
+                    state.memory.slice(-8).map(m => `<span class="memory-tag">${m}</span>`).join('');
+            }
+        } catch(e) {}
+
+        init();
+        console.log('🦁 FFF готов! Карта загружена, лев на месте.');
+    </script>
+</body>
+</html>
